@@ -23,7 +23,7 @@ nc = settings.nc;    % No. of constraints
 ncN = settings.ncN;  % No. of constraints at terminal stage
 
 %% solver configurations
-N  = 30;             % No. of shooting points
+N  = 40;             % No. of shooting points
 settings.N = N;
 
 opt.integrator='ERK4'; % 'ERK4','IRK3, 'ERK4-CASADI'(for test)
@@ -31,8 +31,8 @@ opt.hessian='gauss_newton';  % 'gauss_newton', 'exact'
 opt.qpsolver='qpoases'; %'qpoases'
 opt.condensing='full';  %'full'
 opt.hotstart='no'; %'yes','no' (only for qpoases)
-opt.shifting='no'; % 'yes','no'
-opt.ref_type=1; % 0-time invariant, 1-time varying(no preview), 2-time varying (preview)
+opt.shifting='yes'; % 'yes','no'
+opt.ref_type=0; % 0-time invariant, 1-time varying(no preview), 2-time varying (preview)
 
 %% Initialize Data (all users have to do this)
 
@@ -49,7 +49,7 @@ opt.ref_type=1; % 0-time invariant, 1-time varying(no preview), 2-time varying (
 %% Simulation (start your simulation...)
 
 iter = 1; time = 0.0;
-Tf = 50;               % simulation time
+Tf = 4;               % simulation time
 state_sim= [input.x0]';
 controls_MPC = [input.u0]';
 y_sim = [];

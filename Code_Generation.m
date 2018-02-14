@@ -4,7 +4,7 @@ disp('MATMPC is developed by Yutao Chen, DEI, UniPD');
 disp('---------------------------------------------');
 
 %% Insert Model here
-settings.model='DiM';
+settings.model='InvertedPendulum';
 
 switch settings.model
     case 'InvertedPendulum'
@@ -99,15 +99,6 @@ gxN = jacobian(objN,states)' + SX.zeros(nx,1);
 Cxi = jacobian(path_con, states) + SX.zeros(nc, nx);
 Cui = jacobian(path_con, controls) + SX.zeros(nc, nu);
 CxN = jacobian(path_con_N, states) + SX.zeros(ncN, nx);
-
-% if nbx>0
-%     Cxi=[Cxi;SX.zeros(nbx,nx)];
-%     CxN=[CxN;SX.zeros(nbx,nx)];
-%     for i=1:nbx
-%         Cxi(nc+i,nbx_idx(i))=1;
-%         CxN(ncN+i,nbx_idx(i))=1;
-%     end
-% end
 
 obji_fun = Function('obji_fun',{z,params,refs,Q},{obji+SX.zeros(1,1)},{'z','params','refs','Q'},{'obji'});
 objN_fun = Function('objN_fun',{states,params,refN,QN},{objN+SX.zeros(1,1)},{'states','params','refN','QN'},{'objN'});

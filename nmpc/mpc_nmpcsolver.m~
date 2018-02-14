@@ -28,8 +28,8 @@ function [output, mem] = mpc_nmpcsolver(input, settings, mem, ext)
         tCOND=toc(tcond)*1e3;
         
 %         %% ----------  Solving QP
-        [tQP,mem] = mpc_qp_solve_qpoases(settings,mem);         
-%         [tQP, mem] = mpc_qp_solve_blockIP(mem, settings);
+%         [tQP,mem] = mpc_qp_solve_qpoases(settings,mem);         
+        [tQP, mem] = mpc_qp_solve_blockIP(mem,sizes);
         
         %% hpipm test
         
