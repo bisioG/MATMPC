@@ -4,22 +4,11 @@ disp('MATMPC is developed by Yutao Chen, DEI, UniPD');
 disp('---------------------------------------------');
 
 %% Insert Model here
-settings.model='InvertedPendulum';
+addpath([pwd,'/examples']);
 
-switch settings.model
-    case 'InvertedPendulum'
-        InvertedPendulum;
-    case 'DiM'
-        DiM;
-    case 'ChainofMasses_Lin'
-        ChainofMasses_Lin;
-    case 'ChainofMasses_NLin'
-        ChainofMasses_NLin;
-    case 'Hexacopter'
-        Hexacopter;
-    case 'TiltHex'
-        TiltHex;
-end
+settings.model='TethUAV_param'; % see the folder "examples" for details
+
+run(settings.model);
 
 %%
 import casadi.*
@@ -48,15 +37,15 @@ Simulate_system = Function('Simulate_system', {states,controls,params}, {X}, {'s
 s  = 2; % No. of integration steps per shooting interval
 DT = Ts_st/s;
 f_fun  = Function('f_fun', {states,controls,params}, {SX.zeros(nx,1)+x_dot},{'states','controls','params'},{'xdot'});
-jacX = SX.zeros(nx,nx)+jacobian(x_dot,states);
-jacU = SX.zeros(nx,nu)+jacobian(x_dot,controls);
-jac_f_fun  = Function('jac_f_fun', {states,controls,params}, {jacX,jacU});
 
 impl_jac_x = SX.zeros(nx,nx)+jacobian(impl_f,states);
 impl_jac_u = SX.zeros(nx,nu)+jacobian(impl_f,controls);
 impl_jac_xdot = SX.zeros(nx,nx)+jacobian(impl_f,xdot);
 impl_f = SX.zeros(nx,1) + impl_f;
-impl_f_fun = Function('impl_f_fun',{states,controls,params,xdot},{impl_f, impl_jac_x, impl_jac_u, impl_jac_xdot});
+impl_f_fun = Function('impl_f_fun',{states,controls,params,xdot},{impl_f});
+impl_jac_x_fun = Function('impl_jac_x_fun',{states,controls,params,xdot},{impl_jac_x});
+impl_jac_u_fun = Function('impl_jac_u_fun',{states,controls,params,xdot},{impl_jac_u});
+impl_jac_xdot_fun = Function('impl_jac_xdot_fun',{states,controls,params,xdot},{impl_jac_xdot});
 
 Sx = SX.sym('Sx',nx,nx);
 Su = SX.sym('Su',nx,nu);
@@ -76,11 +65,11 @@ for j=1:s
        [k4] = f(X + DT * k3, U, P);
        X=X+DT/6*(k1 +2*k2 +2*k3 +k4);
 end
-z = [states;controls];
-F = Function('F', {z,params}, {X + SX.zeros(nx,1)}, {'z','params'}, {'xf'});
+% z = [states;controls];
+F = Function('F', {states,controls,params}, {X + SX.zeros(nx,1)});
 A = jacobian(X,states) + SX.zeros(nx,nx);
 B = jacobian(X,controls) + SX.zeros(nx,nu);
-D = Function('D', {z,params}, {A, B}, {'z','params'}, {'A','B'});
+D = Function('D', {states,controls,params}, {A, B});
 
 %% objective and constraints
 
@@ -100,24 +89,25 @@ Cxi = jacobian(path_con, states) + SX.zeros(nc, nx);
 Cui = jacobian(path_con, controls) + SX.zeros(nc, nu);
 CxN = jacobian(path_con_N, states) + SX.zeros(ncN, nx);
 
-obji_fun = Function('obji_fun',{z,params,refs,Q},{obji+SX.zeros(1,1)},{'z','params','refs','Q'},{'obji'});
-objN_fun = Function('objN_fun',{states,params,refN,QN},{objN+SX.zeros(1,1)},{'states','params','refN','QN'},{'objN'});
+obji_fun = Function('obji_fun',{states,controls,params,refs,Q},{obji+SX.zeros(1,1)});
+objN_fun = Function('objN_fun',{states,params,refN,QN},{objN+SX.zeros(1,1)});
 
-Ji_fun=Function('Ji_fun',{z,params,refs,Q},{Jxi,Jui},{'z','params','refs','Q'},{'Jxi','Jui'});
-JN_fun=Function('JN_fun',{states,params,refN,QN},{JxN},{'states','params','refN','QN'},{'JxN'});
+Ji_fun=Function('Ji_fun',{states,controls,params,refs,Q},{Jxi,Jui});
+JN_fun=Function('JN_fun',{states,params,refN,QN},{JxN});
 
-gi_fun=Function('gi_fun',{z,params,refs,Q},{gxi, gui},{'z','params','refs','Q'},{'gxi','gui'});
-gN_fun=Function('gN_fun',{states,params,refN,QN},{gxN},{'states','params','refN','QN'},{'gN'});
+gi_fun=Function('gi_fun',{states,controls,params,refs,Q},{gxi, gui});
+gN_fun=Function('gN_fun',{states,params,refN,QN},{gxN});
 
-Ci_fun=Function('Ci_fun',{z},{Cxi, Cui},{'z'},{'Cxi','Cui'});
-CN_fun=Function('CN_fun',{states},{CxN},{'states'},{'CxN'});
+Ci_fun=Function('Ci_fun',{states,controls,params},{Cxi, Cui});
+CN_fun=Function('CN_fun',{states,params},{CxN});
 
-dobj = SX.zeros(nx+nu,1) + jacobian(obji,z)';
-dobjN = SX.zeros(nx,1) + jacobian(objN,states)';
-adj_dG = SX.zeros(nx+nu,1) + jtimes(X, z, lambdai, true);
+dobj = [gxi;gui];
+dobjN = gxN;
+
+adj_dG = SX.zeros(nx+nu,1) + jtimes(X, [states;controls], lambdai, true);
 
 if nc>0
-    adj_dB = SX.zeros(nx+nu,1) + jtimes(path_con, z, mui, true);
+    adj_dB = SX.zeros(nx+nu,1) + jtimes(path_con, [states;controls], mui, true);
 else
     adj_dB = SX.zeros(nx+nu,1);
 end
@@ -128,7 +118,7 @@ else
     adj_dBN = SX.zeros(nx,1);
 end
 
-adj_fun = Function('adj_fun',{z,params,refs,Q, lambdai, mui},{dobj, adj_dG, adj_dB});
+adj_fun = Function('adj_fun',{states,controls,params,refs,Q,lambdai,mui},{dobj, adj_dG, adj_dB});
 adjN_fun = Function('adjN_fun',{states,params,refN, QN, muN},{dobjN, adj_dBN});
 
 %% Code generation and Compile
@@ -139,26 +129,26 @@ if strcmp(generate,'y')
 
     display('                           ');
     display('    Generating source code...');
-
-    if exist([pwd,'/Source_Codes'],'dir')~=7
-        mkdir([pwd,'/Source_Codes']);
-    end
     
-    cd Source_Codes
+    cd model_src
       
     opts = struct( 'main', false, 'mex' , true ) ; 
     Simulate_system.generate('Simulate_system.c',opts);
     h_fun.generate('h_fun.c',opts);
     path_con_fun.generate('path_con_fun.c',opts);
     path_con_N_fun.generate('path_con_N_fun.c',opts);
+    Ji_fun.generate('Ji_fun.c',opts);
+    JN_fun.generate('JN_fun.c',opts);
    
     opts = struct('main',false,'mex',false,'with_header',true);
     cd ../mex_core
         P = CodeGenerator ('casadi_src.c', opts) ;
         P.add(f_fun);
-        P.add(jac_f_fun);
         P.add(vdeFun);
         P.add(impl_f_fun);
+        P.add(impl_jac_x_fun);
+        P.add(impl_jac_u_fun);
+        P.add(impl_jac_xdot_fun);
         P.add(F);
         P.add(D);
         P.add(h_fun);
@@ -176,7 +166,7 @@ if strcmp(generate,'y')
         P.add(adjN_fun);
         
         P.generate();
-    cd ../Source_Codes
+    cd ../model_src
 
 display('    Code generation completed!');
 
@@ -218,15 +208,18 @@ if strcmp(compile,'y')
     mex(options, OP_FLAGS, CC_FLAGS, PRINT_FLAGS, 'path_con_N_fun.c');
     mex(options, OP_FLAGS, CC_FLAGS, PRINT_FLAGS, 'h_fun.c');
     mex(options, OP_FLAGS, CC_FLAGS, PRINT_FLAGS, 'Simulate_system.c');
+    mex(options, OP_FLAGS, CC_FLAGS, PRINT_FLAGS, 'Ji_fun.c');
+    mex(options, OP_FLAGS, CC_FLAGS, PRINT_FLAGS, 'JN_fun.c');
        
     cd ../mex_core
     Compile_Mex;
-    cd ../Source_Codes
+    cd ../model_src
 
-cd ..
 display('    Compilation completed!');
 
 end
+
+cd ..
 %% NMPC preparation
 
 display('                           ');
@@ -247,7 +240,9 @@ settings.nbu = nbu;
 settings.nbx_idx = nbx_idx;
 settings.nbu_idx = nbu_idx;
 
+cd data
 save('settings','settings');
+cd ..
 
 clear all;
 

@@ -4,6 +4,8 @@
 
 #include "casadi_wrapper.h"
 #include "sim.h"
+#include "erk.h"
+#include "irk.h"
 
 #include "lapack.h"
 #include "blas.h"
@@ -11,31 +13,44 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
-static double *vec_out[3];
+static sim_opts *opts = NULL;
+static sim_in *in = NULL;
+static sim_out *out = NULL;
+static sim_erk_workspace *erk_workspace = NULL;
+static sim_irk_workspace *irk_workspace = NULL;
+static bool mem_alloc = false;
+
+static double *casadi_out[3];
 static double *L = NULL;
 static double *eq_res_vec = NULL;
 static double *lu, *uu;
-static void *workspace = NULL;
-static bool mem_alloc_info = false;
 
-void exitFcn_info(){
-    if (mem_alloc_info){
-        mxFree(vec_out[1]);
-        mxFree(vec_out[2]);
+void exitFcn(){   
+    if (erk_workspace!=NULL)
+        sim_erk_workspace_free(opts, erk_workspace);
+    if (irk_workspace!=NULL)
+        sim_irk_workspace_free(opts, irk_workspace);
+    if (opts!=NULL)
+        sim_opts_free(opts);
+    if (in!=NULL)
+        sim_in_free(in);
+    if (out!=NULL)
+        sim_out_free(out);
+    if (mem_alloc){
+        mxFree(casadi_out[1]);
+        mxFree(casadi_out[2]);
         mxFree(L);
         mxFree(eq_res_vec);
         mxFree(lu);
         mxFree(uu);
-        if (workspace!=NULL)
-            mxFree(workspace);
     }
 }
 
 void
 mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
 {    
-    double *z = mxGetPr( mxGetField(prhs[0], 0, "z") );
-    double *xN = mxGetPr( mxGetField(prhs[0], 0, "xN") );
+    double *x = mxGetPr( mxGetField(prhs[0], 0, "x") );
+    double *u = mxGetPr( mxGetField(prhs[0], 0, "u") );
     double *lambda = mxGetPr( mxGetField(prhs[0], 0, "lambda") );
     double *mu = mxGetPr( mxGetField(prhs[0], 0, "mu") );
     double *muN = mxGetPr( mxGetField(prhs[0], 0, "muN") );
@@ -43,8 +58,8 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     double *y = mxGetPr( mxGetField(prhs[0], 0, "y") );
     double *yN = mxGetPr( mxGetField(prhs[0], 0, "yN") );
     double *od = mxGetPr( mxGetField(prhs[0], 0, "od") );
-    double *Q = mxGetPr( mxGetField(prhs[0], 0, "W") );
-    double *QN = mxGetPr( mxGetField(prhs[0], 0, "WN") );
+    double *W = mxGetPr( mxGetField(prhs[0], 0, "W") );
+    double *WN = mxGetPr( mxGetField(prhs[0], 0, "WN") );
     double *lb = mxGetPr( mxGetField(prhs[0], 0, "lb") );
     double *ub = mxGetPr( mxGetField(prhs[0], 0, "ub") );
     double *lbN = mxGetPr( mxGetField(prhs[0], 0, "lbN") );
@@ -66,10 +81,7 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     mwSize N = mxGetScalar( mxGetField(prhs[1], 0, "N") );
     
     int sim_method = mxGetScalar( mxGetField(prhs[2], 0, "sim_method") );
-    
-    sim_opts opts;
-    opts.forw_sens = false;
-      
+          
     mwIndex i=0,j=0;
     mwSize nz = nx+nu;
     mwSize nw = N*nz+nx;
@@ -79,15 +91,13 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     double one_d = 1.0, zero = 0.0;
     mwSignedIndex one_i = 1;
     
-    double *vec_in[6];
-    double *ode_in[3];
-    double *Sens[2];
-    
-    if (!mem_alloc_info){
-        vec_out[1] = (double *)mxMalloc(nz * sizeof(double));
-        mexMakeMemoryPersistent(vec_out[1]);
-        vec_out[2] = (double *)mxMalloc(nz * sizeof(double));
-        mexMakeMemoryPersistent(vec_out[2]);     
+    double *casadi_in[6];
+        
+    if (!mem_alloc){
+        casadi_out[1] = (double *)mxMalloc(nz * sizeof(double));
+        mexMakeMemoryPersistent(casadi_out[1]);
+        casadi_out[2] = (double *)mxMalloc(nz * sizeof(double));
+        mexMakeMemoryPersistent(casadi_out[2]);     
         L = (double *)mxMalloc( nw * sizeof(double));
         mexMakeMemoryPersistent(L);
         
@@ -99,132 +109,142 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
         uu = (double *)mxMalloc( N*nu * sizeof(double));
         mexMakeMemoryPersistent(uu);
         
-        int size;
         switch(sim_method){
             case 0:
-                size = 0;
                 break;
             case 1:
-                size = sim_erk_calculate_workspace_size(prhs[2],&opts);
+                opts = sim_opts_create(prhs[2]);
+                opts->forw_sens = false;
+                in = sim_in_create(opts);              
+                out = sim_out_create(opts);                
+                erk_workspace = sim_erk_workspace_create(opts);               
+                sim_erk_workspace_init(opts, prhs[2], erk_workspace);   
                 break;
             case 2:
-                size = sim_irk_calculate_workspace_size(prhs[2],&opts);
+                opts = sim_opts_create(prhs[2]);
+                opts->forw_sens = false;
+                in = sim_in_create(opts);              
+                out = sim_out_create(opts);                
+                irk_workspace = sim_irk_workspace_create(opts);               
+                sim_irk_workspace_init(opts, prhs[2], irk_workspace);
                 break;
             default:
                 mexErrMsgTxt("Please choose a supported integrator");
                 break;
          
         }   
-        
-        if (size > 0){
-            workspace = mxMalloc(size);
-            mexMakeMemoryPersistent(workspace);  
-        }
-        
-        mem_alloc_info = true;     
-        mexAtExit(exitFcn_info);
+                
+        mem_alloc = true;     
+        mexAtExit(exitFcn);
     }
     
-    vec_in[3] = Q;
+    casadi_in[4] = W;
     memcpy(eq_res_vec, ds0, nx*sizeof(double));
     
     double *work;
     double KKT=0, eq_res=0, ineq_res=0;
     
     for (i=0;i<N;i++){
-        vec_in[0] = z+i*nz;
-        vec_in[1] = od+i*np;
-        vec_in[2] = y+i*ny;
-        vec_in[4] = lambda+(i+1)*nx;
-        vec_in[5] = mu+i*nc;
+        casadi_in[0] = x+i*nx;
+        casadi_in[1] = u+i*nu;
+        casadi_in[2] = od+i*np;
+        casadi_in[3] = y+i*ny;
+        casadi_in[5] = lambda+(i+1)*nx;
+        casadi_in[6] = mu+i*nc;
            
-        vec_out[0] = L+i*nz;
-        adj_Fun(vec_in, vec_out);
+        casadi_out[0] = L+i*nz;
+        adj_Fun(casadi_in, casadi_out);
         
-        for (j=0;j<nx;j++){
-            vec_out[1][j] -= lambda[i*nx+j];
+        if (i>0){
+            for (j=0;j<nx;j++)
+                casadi_out[1][j] -= lambda[i*nx+j];
+        }else{
+            for (j=0;j<nx;j++)
+                casadi_out[1][j] += lambda[j];
         }
         
-        daxpy(&nz, &one_d, vec_out[1], &one_i, vec_out[0], &one_i);
-        daxpy(&nu, &one_d, mu_u+i*nu, &one_i, vec_out[0]+nx, &one_i);
+        daxpy(&nz, &one_d, casadi_out[1], &one_i, casadi_out[0], &one_i);
+        daxpy(&nu, &one_d, mu_u+i*nu, &one_i, casadi_out[0]+nx, &one_i);
         if (nc>0)
-            daxpy(&nz, &one_d, vec_out[2], &one_i, vec_out[0], &one_i);
+            daxpy(&nz, &one_d, casadi_out[2], &one_i, casadi_out[0], &one_i);
         
-        vec_out[0] = eq_res_vec+(i+1)*nx;        
+              
         switch(sim_method){
             case 0:
-                F_Fun(vec_in, vec_out);
+                casadi_out[0] = eq_res_vec+(i+1)*nx;  
+                F_Fun(casadi_in, casadi_out);
                 break;
-            case 1:               
-                ode_in[0]=z+i*nz;
-                ode_in[1]=z+i*nz+nx;
-                ode_in[2]=od+i*np;
-                sim_erk(ode_in, vec_out, Sens, prhs[2], &opts, workspace);
+            case 1:      
+                in->x = x+i*nx;
+                in->u = u+i*nu;
+                in->p = od+i*np;
+                out->xn = eq_res_vec+(i+1)*nx;
+                sim_erk(in, out, opts, erk_workspace);
                 break;
             case 2:                         
-                ode_in[0]=z+i*nz;
-                ode_in[1]=z+i*nz+nx;
-                ode_in[2]=od+i*np;
-                sim_irk(ode_in, vec_out, Sens, prhs[2], &opts, workspace);
+                in->x = x+i*nx;
+                in->u = u+i*nu;
+                in->p = od+i*np;
+                out->xn = eq_res_vec+(i+1)*nx;
+                sim_irk(in, out, opts, irk_workspace);
                 break;
             default :
                 mexErrMsgTxt("Please choose a supported integrator");
                 break;
         }
         
-        if (i < N-1){
-            for (j=0;j<nx;j++)
-                vec_out[0][j] -= z[(i+1)*nz+j];
-        }else{
-            for (j=0;j<nx;j++)
-                vec_out[0][j] -= xN[j];
-        }
+        
+        for (j=0;j<nx;j++)
+            eq_res_vec[(i+1)*nx+j] -= x[(i+1)*nx+j];
+        
         
         for (j=0;j<nu;j++){
-            lu[i*nu+j] = lbu[i*nu+j] - z[i*nz+nx+j];
-            uu[i*nu+j] = ubu[i*nu+j] - z[i*nz+nx+j];
+            lu[i*nu+j] = lbu[i*nu+j] - u[i*nu+j];
+            uu[i*nu+j] = ubu[i*nu+j] - u[i*nu+j];
         }
         
         if (nc>0){
-            vec_in[0]=z+i*nz;
-            vec_in[1]=z+i*nz+nx;
-            vec_in[2]=od+i*np;
-            vec_out[0] = lc + i*nc;
-            path_con_Fun(vec_in, vec_out);
+            casadi_in[0]=x+i*nx;
+            casadi_in[1]=u+i*nu;
+            casadi_in[2]=od+i*np;
+            casadi_out[0] = lc + i*nc;
+            path_con_Fun(casadi_in, casadi_out);
             for (j=0;j<nc;j++){
-                uc[i*nc+j] = ub[i*nc+j] - vec_out[0][j];
-                vec_out[0][j] = lb[i*nc+j] - vec_out[0][j];            
+                uc[i*nc+j] = ub[i*nc+j] - casadi_out[0][j];
+                casadi_out[0][j] = lb[i*nc+j] - casadi_out[0][j];            
             }
         }
     }
-    vec_in[0] = xN;
-    vec_in[1] = od+N*np;
-    vec_in[2] = yN;
-    vec_in[3] = QN;
-    vec_in[4] = muN;
+    casadi_in[0] = x+N*nx;
+    casadi_in[1] = od+N*np;
+    casadi_in[2] = yN;
+    casadi_in[3] = WN;
+    casadi_in[4] = muN;
     
-    vec_out[0] = L+N*nz;
-    adjN_Fun(vec_in, vec_out);
+    casadi_out[0] = L+N*nz;
+    adjN_Fun(casadi_in, casadi_out);
+    for (j=0;j<nx;j++)
+        casadi_out[0][j] -= lambda[N*nx+j];
     
     if (ncN>0)
-        daxpy(&nx, &one_d, vec_out[1], &one_i, vec_out[0], &one_i);
+        daxpy(&nx, &one_d, casadi_out[1], &one_i, casadi_out[0], &one_i);
     
     if (ncN>0){
-        vec_out[0] = lc + N*nc;
-        path_con_N_Fun(vec_in, vec_out); 
+        casadi_out[0] = lc + N*nc;
+        path_con_N_Fun(casadi_in, casadi_out); 
         for (j=0;j<ncN;j++){
-            uc[i*nc+j] = ubN[j] - vec_out[0][j];
-            vec_out[0][j] = lbN[j] - vec_out[0][j];            
+            uc[i*nc+j] = ubN[j] - casadi_out[0][j];
+            casadi_out[0][j] = lbN[j] - casadi_out[0][j];            
         }
     }
          
-    eq_res = dlange(Norm, &neq, &one_i, eq_res_vec, &one_i, work);
-    KKT = dlange(Norm, &nw, &one_i, L, &one_i, work);
+    eq_res = dlange(Norm, &neq, &one_i, eq_res_vec, &neq, work);
+    KKT = dlange(Norm, &nw, &one_i, L, &nw, work);
     
     for (i=0;i<N*nu;i++)
-        ineq_res += MIN(uu[i],0) + MAX(lu[i],0);  
+        ineq_res += MAX(-1*uu[i],0) + MAX(lu[i],0);
     for (i=0;i<nineq;i++)
-        ineq_res += MIN(uc[i],0) + MAX(lc[i],0);
+        ineq_res += MAX(-1*uc[i],0) + MAX(lc[i],0);
     
     plhs[0] = mxCreateDoubleScalar(eq_res); // eq_res
     plhs[1] = mxCreateDoubleScalar(ineq_res); // ineq_res

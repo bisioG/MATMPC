@@ -91,35 +91,14 @@ while time(end) < Tf
     % obtain the state measurement
     input.x0 = state_sim(end,:)';
     
-    % call the NMPC solver   
-    [output, mem]=mpc_nmpcsolver(input, settings, mem);
-    
-    % obtain the solution and update the data
-    switch opt.shifting
-        case 'yes'
-        input.x=[output.x(:,2:end),output.x(:,end)];  
-        input.u=[output.u(:,2:end),output.u(:,end)]; 
-        input.lambda=[output.lambda(:,2:end),output.lambda(:,end)];
-        input.mu=[output.mu(:,2:end),[output.muN;output.mu(ncN+1:nc,end)]];
-        input.muN=output.muN;
-        case 'no'
-        input.x=output.x;
-        input.u=output.u;
-        input.lambda=output.lambda;
-        input.mu=output.mu;
-        input.muN=output.muN;
-    end
-    
-    % collect the statistics
-    cpt=output.info.cpuTime;
-    tshooting=output.info.shootTime;
-    tcond=output.info.condTime;
-    tqp=output.info.qpTime;
-    KKT=output.info.kktValue;
-    
+    % call the NMPC solver      
+    tic;
+    RTI_step(input, settings, mem);
+    cpt = toc*1e3;
+            
     % Simulate system dynamics
     sim_input.x = state_sim(end,:).';
-    sim_input.u = output.u(:,1);
+    sim_input.u = input.u(:,1);
     sim_input.p = input.od(:,1)';
     xf=full( Simulate_system('Simulate_system', sim_input.x, sim_input.u, sim_input.p) ); 
     
@@ -128,31 +107,35 @@ while time(end) < Tf
     
     % Collect constraints
     constraints=[constraints; full( path_con_fun('path_con_fun', xf, sim_input.u, sim_input.p) )'];
-    
-    % Collect other data
-    if strcmp(settings.model,'ActiveSeat')
-        input_u = [input_u; output.u(1:6,1)',xf(32)];
-    end
-    
+        
     % store the optimal solution and states
-    controls_MPC = [controls_MPC; output.u(:,1)'];
+    controls_MPC = [controls_MPC; input.u(:,1)'];
     state_sim = [state_sim; xf'];
+    
+    % shift the initialization
+    switch opt.shifting
+        case 'yes'
+        input.x=[input.x(:,2:end),input.x(:,end)];  
+        input.u=[input.u(:,2:end),input.u(:,end)];
+        case 'no'
+    end
     
     % go to the next sampling instant
     nextTime = mem.iter*Ts; 
     mem.iter = mem.iter+1;
-    disp(['current time:' num2str(nextTime) '  CPT:' num2str(cpt) 'ms  MULTIPLE SHOOTING:' num2str(tshooting) 'ms  COND:' num2str(tcond) 'ms  QP:' num2str(tqp) 'ms  KKT:' num2str(KKT)]);
+    disp(['current time:' num2str(nextTime) '  CPT:' num2str(cpt) 'ms']);
         
     time = [time nextTime];
     
-    CPT = [CPT; cpt, tshooting, tcond, tqp];
+    CPT = [CPT; cpt];
 end
 
-qpOASES_sequence( 'c', mem.warm_start);
+% qpOASES_sequence( 'c', mem.warm_start);
 clear mex;
 
 %% draw pictures (optional)
-disp(['Average CPT: ', num2str(mean(CPT(2:end-1,:),1)) ]);
-disp(['Maximum CPT: ', num2str(max(CPT(2:end-1,:))) ]);
+disp(['Average CPT: ',num2str(mean(CPT(2:end,:),1))]);
+
+disp(['Maximum CPT: ',num2str(max(CPT(2:end,:)))]);
 
 Draw;
