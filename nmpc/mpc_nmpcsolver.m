@@ -14,7 +14,7 @@ function [output, mem] = mpc_nmpcsolver(input, settings, mem)
         %% ----------- QP Preparation
        
         tshoot = tic;
-        qp_generation(input, settings, mem);
+        qp_generation_cmon(input, settings, mem);
         tSHOOT = toc(tshoot)*1e3; 
                       
         tcond=tic;
@@ -31,6 +31,9 @@ function [output, mem] = mpc_nmpcsolver(input, settings, mem)
         %% ---------- KKT calculation 
         
         [eq_res, ineq_res, KKT] = solution_info(input, settings, mem);
+        
+        %% eta computation
+        adaptive_eta(mem,settings);
         
         %% ---------- Multiple call management and convergence check
                         

@@ -120,6 +120,25 @@ function [input, mem] = InitMemory(settings, opt, input)
         mem.S = zeros(nx,nu*N);
         mem.R = zeros(nu,nu*N);
     end
+    
+
+    %% for CMON-RTI	
+    mem.F_old = zeros(nx,N);	
+    mem.CMON_pri = zeros(N,1);	
+    mem.CMON_dual = zeros(N,1);	
+    mem.q_dual = zeros(nx,N+1);	
+    mem.dmu = zeros(N*nu+N*nc+ncN,1);
+    mem.threshold_pri = 0;	
+    mem.threshold_dual = 0;	
+    mem.tol=0;	
+    mem.perc=100;
+    
+    mem.tol_abs=1e-1;
+    mem.tol_ref=1e-1;  	       
+    mem.alpha = 1;      
+    mem.beta = 1;        
+    mem.c1 = 0.1;	        
+    mem.rho_cmon = 1e1;
           
     %% input
     input.lambda=zeros(nx,N+1);

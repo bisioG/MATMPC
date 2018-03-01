@@ -284,6 +284,9 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     double mu_safty = mxGetScalar( mxGetField(prhs[0], 0, "mu_safty") );
     double *mu_merit = mxGetPr( mxGetField(prhs[0], 0, "mu_merit") );
     
+    double *q_dual = mxGetPr( mxGetField(prhs[0], 0, "q_dual") );          
+    double *dmu = mxGetPr( mxGetField(prhs[0], 0, "dmu") );
+    
     int i=0,j=0;
     
     int sim_method = mxGetScalar( mxGetField(prhs[0], 0, "sim_method") );
@@ -386,21 +389,33 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     daxpy(&nx_t, &alpha, dx, &one_i, x, &one_i); 
     daxpy(&nu_t, &alpha, du, &one_i, u, &one_i);
     
+    for (i=0;i<neq;i++)	
+        q_dual[i] = lambda_new[i] - lambda[i];
+    
     for (i=0;i<neq;i++)
         lambda[i] *= inc;
     daxpy(&neq, &alpha, lambda_new, &one_i, lambda, &one_i);
+    
+    for (i=0;i<nbu;i++)	
+        dmu[i] = mu_u_new[i] - mu_u[i];
     
     for (i=0;i<nbu;i++)
         mu_u[i] *= inc;
     daxpy(&nbu, &alpha, mu_u_new, &one_i, mu_u, &one_i);
     
-    if (nc>0){        
+    if (nc>0){ 
+        for (i=0;i<nineq;i++)	
+            dmu[N*nu+i] = mu_new[i] - mu[i];
+        
         for (i=0;i<nineq;i++)
             mu[i] *= inc;
         daxpy(&nineq, &alpha, mu_new, &one_i, mu, &one_i);                    
     }
     
-    if (ncN>0){                   
+    if (ncN>0){  
+        for (i=0;i<ncN;i++)	
+            dmu[N*nu+nineq+i] = muN_new[i] - muN[i];
+        
         for (i=0;i<ncN;i++)
             muN[i] *= inc;
         daxpy(&ncN, &alpha, muN_new, &one_i, muN, &one_i);
