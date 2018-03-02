@@ -35,7 +35,7 @@ opt.hessian='gauss_newton';  % 'gauss_newton',
 opt.qpsolver='qpoases'; %'qpoases'
 opt.condensing='full';  %'full'
 opt.hotstart='no'; %'yes','no' (only for qpoases)
-opt.shifting='no'; % 'yes','no'
+opt.shifting='yes'; % 'yes','no'
 opt.lin_obj='yes'; % 'yes','no' % if objective function is linear least square
 opt.ref_type=0; % 0-time invariant, 1-time varying(no preview), 2-time varying (preview)
 
@@ -45,12 +45,12 @@ opt.ref_type=0; % 0-time invariant, 1-time varying(no preview), 2-time varying (
 
 %% Initialize Solvers (only for advanced users)
 
-[input, mem] = InitMemory(settings, opt, input);
+mem = InitMemory(settings, opt, input);
 
 %% Simulation (start your simulation...)
 
 mem.iter = 1; time = 0.0;
-Tf = 50;  % simulation time
+Tf = 4;  % simulation time
 state_sim= [input.x0]';
 controls_MPC = [input.u0]';
 y_sim = [];

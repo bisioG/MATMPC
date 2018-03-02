@@ -216,9 +216,22 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
         }
         
         // gradient
-        casadi_out[0] = gx+i*nx;
-        casadi_out[1] = gu+i*nu;
-        gi_Fun(casadi_in, casadi_out);
+//         casadi_out[0] = gx+i*nx;
+//         casadi_out[1] = gu+i*nu;
+//         gi_Fun(casadi_in, casadi_out);
+        casadi_in[5] = lambda+(i+1)*nx;	
+        casadi_in[6] = mu+i*nc;	
+        dual_out[0] = tmp;	
+        dual_out[1] = num_dual;	
+        adj_Fun(casadi_in, dual_out);
+        
+        for(j=0;j<nx;j++)
+            gx[i*nx+j] = dual_out[0][j] + dual_out[1][j];
+        dgemv(Trans, &nx, &nx, &minus_one_d, Sens[0], &nx, lambda+(i+1)*nx, &one_i, &one_d, gx+i*nx, &one_i);
+        
+        for(j=0;j<nu;j++)
+            gu[i*nu+j] = dual_out[0][nx+j] + dual_out[1][nx+j];
+        dgemv(Trans, &nx, &nu, &minus_one_d, Sens[1], &nx, lambda+(i+1)*nx, &one_i, &one_d, gu+i*nu, &one_i);
         
         // constraint residual
         if (nc>0){  

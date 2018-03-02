@@ -86,7 +86,7 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     *tol = tol_abs * sqrt(ns) + tol_ref * dnrm2(&ns, dy, &one_i); 	
     	
     *threshold_pri = (sqrt(c1)*(*tol))/(2*alpha*rho_cmon*norm_V_pri);	
-    *threshold_dual = (sqrt(1-c1)*(*tol))/(2*beta*rho_cmon*norm_V_dual);	
+    *threshold_dual = (sqrt(1-c1)*(*tol))/(beta*rho_cmon*norm_V_dual);	
     	
     	
 } 

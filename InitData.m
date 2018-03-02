@@ -489,14 +489,27 @@ function [input, data] = InitData(settings)
     x = repmat(input.x0,1,N+1);  % initialize all shooting points with the same initial state 
     u = repmat(input.u0,1,N);    % initialize all controls with the same initial control
     para = repmat(para0,1,N+1); % initialize all parameters with the same initial para
+    
+%     load opt_data;
+%     input.x = x+0.2*randn(nx,N+1);
+%     input.u = u+0.2*randn(nu,N);
+
+    load init_data;
 
     input.x=x;        % states and controls of the first N stages (nx by N+1 matrix)
-    input.u=u;           % states of the terminal stage (nu by N vector)
-    input.od=para;               % on-line parameters (np by N+1 matrix)
-    input.W=Q;                   % weights of the first N stages (ny by ny matrix)
-    input.WN=QN;                 % weights of the terminal stage (nyN by nyN matrix)
+    input.u=u;        % states of the terminal stage (nu by N vector)
+    input.od=para;    % on-line parameters (np by N+1 matrix)
+    input.W=Q;        % weights of the first N stages (ny by ny matrix)
+    input.WN=QN;      % weights of the terminal stage (nyN by nyN matrix)
 
-
+%     input.lambda = lambda+0.2*randn(nx,N+1);
+    input.lambda = lambda;
+%     input.lambda=zeros(nx,N+1);
+    input.mu=zeros(nc,N);
+    input.muN=zeros(ncN,1);
+    input.mu_u = zeros(N*nu,1);
+    
+%     save('init_data','-struct','input','x','u','lambda');
     %% Reference generation
 
     switch settings.model

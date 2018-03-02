@@ -3,12 +3,21 @@ function [output, mem] = mpc_nmpcsolver(input, settings, mem)
     tic;
 
     i=0;
-    KKT = 1e8;
+%     KKT = 1e8;
     
     CPT.SHOOT=0;
     CPT.COND=0;
     CPT.QP=0;
-   
+    
+    load opt_data;
+    err=sqrt( norm(input.x-x) + norm(input.u-u) ); 
+    perc = mem.perc;
+    kkt=[];
+    
+    [eq_res, ineq_res, KKT] = solution_info(input, settings, mem);
+    kkt=[kkt;KKT];
+    
+    
     while(i < mem.sqp_maxit  &&  KKT > mem.kkt_lim ) % RTI or multiple call
         
         %% ----------- QP Preparation
@@ -33,6 +42,11 @@ function [output, mem] = mpc_nmpcsolver(input, settings, mem)
         [eq_res, ineq_res, KKT] = solution_info(input, settings, mem);
         
         %% eta computation
+        if mem.iter==1 && i==0
+            [rho_inv, c0] = CMoN_Init(settings, mem);
+            mem.rho_cmon = rho_inv*c0;
+        end
+        
         adaptive_eta(mem,settings);
         
         %% ---------- Multiple call management and convergence check
@@ -43,8 +57,14 @@ function [output, mem] = mpc_nmpcsolver(input, settings, mem)
         
         i=i+1;
         
+        err=[err;sqrt( norm(input.x-x) + norm(input.u-u) )]; 
+        perc = [perc;mem.perc];
+        kkt=[kkt;KKT];
+        
     end
-
+    
+    save('conv_data_2','err','perc','kkt');
+   
     output.info.cpuTime=toc*1e3;   % Total CPU time for the current sampling instant
     
     output.x=input.x;

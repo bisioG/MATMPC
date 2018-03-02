@@ -1,4 +1,4 @@
-function [input, mem] = InitMemory(settings, opt, input)
+function [mem] = InitMemory(settings, opt, input)
 
     Ts  = settings.Ts;       % Sampling time
     Ts_st = settings.Ts_st;  % Shooting interval
@@ -61,8 +61,8 @@ function [input, mem] = InitMemory(settings, opt, input)
             error('Please choose a correct integrator');       
     end
     
-    mem.sqp_maxit = 1;           % maximum number of iterations for each sampling instant (for RTI, this is ONE)
-    mem.kkt_lim = 1e-1;             % tolerance on optimality
+    mem.sqp_maxit = 100;           % maximum number of iterations for each sampling instant (for RTI, this is ONE)
+    mem.kkt_lim = 1e-8;             % tolerance on optimality
     mem.mu_merit=0;              % initialize the parameter
     mem.eta=1e-4;                % merit function parameter
     mem.tau=0.8;                 % step length damping factor
@@ -140,11 +140,6 @@ function [input, mem] = InitMemory(settings, opt, input)
     mem.c1 = 0.1;	        
     mem.rho_cmon = 1e1;
           
-    %% input
-    input.lambda=zeros(nx,N+1);
-    input.mu=zeros(nc,N);
-    input.muN=zeros(ncN,1);
-    input.mu_u = zeros(N*nu,1);
-    
+    mem.local = 1;
 end
 

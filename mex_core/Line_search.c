@@ -291,6 +291,7 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     
     int sim_method = mxGetScalar( mxGetField(prhs[0], 0, "sim_method") );
     int sqp_maxit = mxGetScalar( mxGetField(prhs[0], 0, "sqp_maxit") );   
+    int local = mxGetScalar( mxGetField(prhs[0], 0, "local") );
        
     if (!mem_alloc){       
         eq_res_vec = (double *)mxMalloc( neq * sizeof(double));
@@ -336,7 +337,7 @@ mexFunction(int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[])
     double sigma, pd, grad, mu_lb=0, obj, obj_new, dir_grad;
     double alpha = 1.0;
     bool newpoint = false;
-    if (sqp_maxit > 1 ){
+    if (sqp_maxit > 1 && local!=1 ){
         cons_res = eval_cons_res(x, u, od, ds0, lb, ub, lc, uc,
                                  lbN, ubN, lbu, ubu, nx, nu, nc, ncN,
                                  N, np, eq_res_vec, sim_method, opts, in, out,
