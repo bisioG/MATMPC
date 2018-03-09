@@ -27,17 +27,17 @@ nc = settings.nc;    % No. of constraints
 ncN = settings.ncN;  % No. of constraints at terminal stage
 
 %% solver configurations
-N  = 40;             % No. of shooting points
+N  = 60;             % No. of shooting points
 settings.N = N;
 
 opt.integrator='ERK4-CASADI'; % 'ERK4','IRK3, 'ERK4-CASADI'
 opt.hessian='gauss_newton';  % 'gauss_newton' 
-opt.qpsolver='hpipm_dense'; %'qpoases', 'quadprog', 'hpipm_sparse', 'hpipm_dense'
+opt.qpsolver='qpoases'; %'qpoases', 'quadprog', 'hpipm_sparse', 'hpipm_dense'
 opt.condensing='full';  %'full'
 opt.hotstart='no'; %'yes','no' (only for qpoases)
-opt.shifting='yes'; % 'yes','no'
-opt.lin_obj='yes'; % 'yes','no' % if objective function is linear least square
-opt.ref_type=0; % 0-time invariant, 1-time varying(no preview), 2-time varying (preview)
+opt.shifting='no'; % 'yes','no'
+opt.lin_obj='no'; % 'yes','no' % if objective function is linear least square
+opt.ref_type=1; % 0-time invariant, 1-time varying(no preview), 2-time varying (preview)
 
 %% Initialize Data (all users have to do this)
 
@@ -50,7 +50,7 @@ mem = InitMemory(settings, opt, input);
 %% Simulation (start your simulation...)
 
 mem.iter = 1; time = 0.0;
-Tf = 4;  % simulation time
+Tf = 25;  % simulation time
 state_sim= [input.x0]';
 controls_MPC = [input.u0]';
 y_sim = [];
@@ -60,6 +60,12 @@ ref_traj = [];
 input_u = input.u0';
 
 while time(end) < Tf
+    
+    if strcmp(settings.model,'ActiveSeat_onlyP')
+        para0 = data.PAR(mem.iter,:)';
+        para = repmat(para0,1,N+1);
+        input.od=para;        
+    end
     
     % the reference input.y is a ny by N matrix
     % the reference input.yN is a nyN by 1 vector
@@ -134,6 +140,10 @@ while time(end) < Tf
         input_u = [input_u; output.u(1:6,1)',xf(32)];
     end
     
+    if strcmp(settings.model,'ActiveSeat_onlyP')
+        input_u = [input_u; output.u(:,1)];
+    end
+    
     % store the optimal solution and states
     controls_MPC = [controls_MPC; output.u(:,1)'];
     state_sim = [state_sim; xf'];
@@ -159,3 +169,7 @@ disp(['Average CPT: ', num2str(mean(CPT(2:end-1,:),1)) ]);
 disp(['Maximum CPT: ', num2str(max(CPT(2:end-1,:))) ]);
 
 Draw;
+
+if strcmp(settings.model,'ActiveSeat')
+    save([pwd,'\data\ActiveSeat_onlyP\data_MPC_ActiveSeat_full'],'controls_MPC','state_sim');
+end

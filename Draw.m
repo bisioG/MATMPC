@@ -8,6 +8,16 @@ green=[0 205 102]/255;
 
 % start generating pictures
 switch settings.model
+    case 'ActiveSeat_onlyP'
+        % load the data you saved
+        load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
+        figure;        
+        plot(time(1:end-1),rif_pressione(1:Tf/0.005)/0.016) % 0.016 è l'area del cuscinetto
+        hold on; grid on;
+        plot(time(1:end-1),y_sim(:,2)/0.016);
+        legend('Actual lateral trunk pressure','Pressure induced by platform motion')
+        xlabel('time [s]'); ylabel('[Pa]');
+        
     case 'DiM'
 
         samples=size(y_sim,1);
@@ -468,7 +478,7 @@ switch settings.model
         
     case 'ActiveSeat'
         % load the data you saved
-        load('e:/study/NNID/MATMPC/data/ActiveSeat/AS_REF_DATA');
+        load([pwd,'\data\ActiveSeat/AS_REF_DATA']);
         
         figure
         plot(time(1:end-1),y_sim(:,1))

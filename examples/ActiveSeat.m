@@ -1,8 +1,7 @@
 %% find your path to the original active seat model files
 
-addpath(genpath('e:/study/NNID/Active_seat_belt/Nonlinear'));
-
-cd('e:/study/NNID/Active_seat_belt/Nonlinear');
+addpath(genpath('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\nonlinear'));
+cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\nonlinear');
 
 %% read data
 
@@ -236,8 +235,8 @@ data_AS.y_lim_yx_pl = y_lim_yx_pl;
 data_AS.y_lim_zv_pv = y_lim_zv_pv;
 data_AS.y_lim_za_pa = y_lim_za_pa;
 
-save('e:/study/NNID/MATMPC/data/ActiveSeat/data_AS.mat','data_AS');
+save('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC/data/ActiveSeat/data_AS.mat','data_AS');
 
-cd('e:/study/NNID/MATMPC');
+cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC');
 
 clc;
