@@ -135,13 +135,14 @@ while time(end) < Tf
     % Collect constraints
     constraints=[constraints; full( path_con_fun('path_con_fun', xf, sim_input.u, sim_input.p) )'];
     
-    % Collect other data
+    % Collect other data xf(32)= pressY 
     if strcmp(settings.model,'ActiveSeat')
         input_u = [input_u; output.u(1:6,1)',xf(32)];
     end
     
-    if strcmp(settings.model,'ActiveSeat_onlyP')
-        input_u = [input_u; output.u(:,1)];
+   
+    if strcmp(settings.model,'ActiveSeat_onlyP') % xf(5) = pressY
+        input_u = [input_u; xf(5)];
     end
     
     % store the optimal solution and states
@@ -170,6 +171,7 @@ disp(['Maximum CPT: ', num2str(max(CPT(2:end-1,:))) ]);
 
 Draw;
 
+%% save reference for ActiveSeat_onlyP
 if strcmp(settings.model,'ActiveSeat')
     save([pwd,'\data\ActiveSeat_onlyP\data_MPC_ActiveSeat_full'],'controls_MPC','state_sim');
 end
