@@ -144,7 +144,7 @@ while time(end) < Tf
         input_u = [input_u; xf(5)];
     end
     
-    if strcmp(settings.model,'ActiveSeat_onlyP_Lin') % xf(4) = pressY
+    if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction') % xf(4) = pressY
         input_u = [input_u; xf(4)];
     end
     
@@ -155,7 +155,7 @@ while time(end) < Tf
     % go to the next sampling instant
     nextTime = mem.iter*Ts; 
     mem.iter = mem.iter+1;
-    disp(['current time:' num2str(nextTime) '  CPT:' num2str(cpt) 'ms  MULTIPLE SHOOTING:' num2str(tshooting) 'ms  COND:' num2str(tcond) 'ms  QP:' num2str(tqp) 'ms  KKT:' num2str(KKT) '  SQP_IT:' num2str(output.info.iteration_num)]);
+%     disp(['current time:' num2str(nextTime) '  CPT:' num2str(cpt) 'ms  MULTIPLE SHOOTING:' num2str(tshooting) 'ms  COND:' num2str(tcond) 'ms  QP:' num2str(tqp) 'ms  KKT:' num2str(KKT) '  SQP_IT:' num2str(output.info.iteration_num)]);
         
     time = [time nextTime];
     
@@ -169,6 +169,8 @@ end
 clear mex;
 
 %% draw pictures (optional)
+display('                           ');
+disp(['Model:', settings.model ]);
 disp(['Average CPT: ', num2str(mean(CPT(2:end-1,:),1)) ]);
 disp(['Maximum CPT: ', num2str(max(CPT(2:end-1,:))) ]);
 
@@ -178,3 +180,11 @@ Draw;
 if strcmp(settings.model,'ActiveSeat')
     save([pwd,'\data\ActiveSeat_onlyP\data_MPC_ActiveSeat_full'],'controls_MPC','state_sim');
 end
+
+
+%% errors
+
+%RMSE
+load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
+RMSE = sqrt( mean(rif_pressione(1:5000)-y_sim(:,1)').^2 )/0.016;
+disp(['RMSE: ', num2str(RMSE), '[Pa]' ]);

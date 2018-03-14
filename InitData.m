@@ -11,7 +11,7 @@ function [input, data] = InitData(settings)
     np = settings.np;    % No. of parameters (on-line data)
     nc = settings.nc;    % No. of constraints
     ncN = settings.ncN;  % No. of constraints at terminal stage
-    N     = settings.N;             % No. of shooting points
+    N  = settings.N;             % No. of shooting points
     nbx = settings.nbx;
     nbu = settings.nbu;
     nbu_idx = settings.nbu_idx;
@@ -98,11 +98,11 @@ function [input, data] = InitData(settings)
             input.u0 = zeros(nu,1);
             para0 = [0 0 0];
 
-            Wq_t(1) = 1; % peso sull'unica uscita pressione totale ypress
+            Wq_t(1) = 10000; % peso sull'unica uscita pressione totale ypress
 
             Wq = diag(Wq_t); % diag matrix coi pesi
 
-            Wr3_t(1)= 0.01;
+            Wr3_t(1)= 0.0001;
             Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
             Q = blkdiag(Wq,Wr3);
@@ -147,11 +147,11 @@ function [input, data] = InitData(settings)
             input.u0 = zeros(nu,1);
             para0 = [0 0 0];         
 
-            Wq_t(1) = 1; % peso sull'unica uscita pressione totale ypress
+            Wq_t(1) = 10000; % peso sull'unica uscita pressione totale ypress
 
             Wq = diag(Wq_t); % diag matrix coi pesi
 
-            Wr3_t(1)= 0.01;
+            Wr3_t(1)= 0.0001;
             Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
             Q = blkdiag(Wq,Wr3);
@@ -189,6 +189,56 @@ function [input, data] = InitData(settings)
             
             input.lbu = repmat(lbu,1,N);
             input.ubu = repmat(ubu,1,N);
+            
+        case 'ActiveSeat_onlyP_WOfriction'
+            
+            input.x0 = [0, 0.0001, 0, 0]';
+            input.u0 = zeros(nu,1);
+            para0 = [0 0 0];         
+
+            Wq_t(1) = 10000; % peso sull'unica uscita pressione totale ypress
+
+            Wq = diag(Wq_t); % diag matrix coi pesi
+
+            Wr3_t(1)= 0.0001;
+            Wr3 = diag(Wr3_t); % diag matrix coi pesi
+            
+            Q = blkdiag(Wq,Wr3);
+            QN = Wq(1:nyN,1:nyN)*0;
+            
+            
+            % upper and lower bounds for states (=nbx)
+            
+            lb_x = [];%-inf(nu,1);
+            ub_x = [];%-lb_x;
+
+            % upper and lower bounds for controls (=nbu)           
+            lb_u = [];
+            ub_u = [];
+                       
+            % upper and lower bounds for general constraints (=nc)
+            lb_g = [];
+            ub_g = [];            
+            lb_gN = [];
+            ub_gN = [];
+
+            % store the constraint data into input
+            
+            input.lb=repmat([lb_g;lb_x],1,N);
+            input.ub=repmat([ub_g;ub_x],1,N); 
+            nput.lbN=[lb_gN;lb_x];               
+            input.ubN=[ub_gN;ub_x]; 
+            
+            lbu = -inf(nu,1);
+            ubu = inf(nu,1);
+            for i=1:nbu
+                lbu(nbu_idx(i)) = lb_u(i);
+                ubu(nbu_idx(i)) = ub_u(i);
+            end
+            
+            input.lbu = repmat(lbu,1,N);
+            input.ubu = repmat(ubu,1,N);
+            
             
         case 'DiM'
             input.x0 = zeros(nx,1);    % initial state
@@ -483,6 +533,12 @@ function [input, data] = InitData(settings)
             cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC');
             
         case 'ActiveSeat_onlyP_Lin'
+            cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC\data\ActiveSeat_onlyP');
+            data.REF = AS_REF_onlyP(25,Ts);
+            data.PAR = AS_PAR(25,Ts);
+            cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC');
+            
+        case 'ActiveSeat_onlyP_WOfriction'
             cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC\data\ActiveSeat_onlyP');
             data.REF = AS_REF_onlyP(25,Ts);
             data.PAR = AS_PAR(25,Ts);
