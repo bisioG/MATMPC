@@ -97,30 +97,63 @@ function [input, data] = InitData(settings)
             input.x0 = [0, 0.0001, 0, 0, 0]';
             input.u0 = zeros(nu,1);
             para0 = [0 0 0];
-            
-            rw_deltau_xy = [10 0.01];
-            rw_u_xy = [0.0001 0.1];
-            rw_uscita_yx = [40000 500 15000 600 600 0];
-            rw_deltau_yx = [10 10];
-            rw_u_yx = [0.0001 0.01];
-            rw_uscita_za = [3800 1100 0];
-            rw_deltau_za = 0.0001;
-            rw_u_za = 0.0001;
-            rw_uscita_zv = [2000 600 2000];
-            rw_deltau_zv = 0.0001;
-            rw_u_zv = 0.0001;
 
             Wq_t(1) = 1; % peso sull'unica uscita pressione totale ypress
 
             Wq = diag(Wq_t); % diag matrix coi pesi
 
-%             Wr_t(1) = 1; % peso sull'unico ingresso dpressY
-%             Wr = diag(Wr_t); % matrice diagonale con i pesi su ingressi effettivi
+            Wr3_t(1)= 0.01;
+            Wr3 = diag(Wr3_t); % diag matrix coi pesi
+            
+            Q = blkdiag(Wq,Wr3);
+            QN = Wq(1:nyN,1:nyN)*0;
+            
+            
+            % upper and lower bounds for states (=nbx)
+            
+            lb_x = [];%-inf(nu,1);
+            ub_x = [];%-lb_x;
+
+            % upper and lower bounds for controls (=nbu)           
+            lb_u = [];
+            ub_u = [];
+                       
+            % upper and lower bounds for general constraints (=nc)
+            lb_g = [];
+            ub_g = [];            
+            lb_gN = [];
+            ub_gN = [];
+
+            % store the constraint data into input
+            
+            input.lb=repmat([lb_g;lb_x],1,N);
+            input.ub=repmat([ub_g;ub_x],1,N); 
+            nput.lbN=[lb_gN;lb_x];               
+            input.ubN=[ub_gN;ub_x]; 
+            
+            lbu = -inf(nu,1);
+            ubu = inf(nu,1);
+            for i=1:nbu
+                lbu(nbu_idx(i)) = lb_u(i);
+                ubu(nbu_idx(i)) = ub_u(i);
+            end
+            
+            input.lbu = repmat(lbu,1,N);
+            input.ubu = repmat(ubu,1,N);
+            
+            case 'ActiveSeat_onlyP_Lin'
+            
+            input.x0 = [0, 0.0001, 0, 0]';
+            input.u0 = zeros(nu,1);
+            para0 = [0 0 0];         
+
+            Wq_t(1) = 1; % peso sull'unica uscita pressione totale ypress
+
+            Wq = diag(Wq_t); % diag matrix coi pesi
 
             Wr3_t(1)= 0.01;
             Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
-%             Q = blkdiag(Wq,Wr*Ts^2,Wr3);
             Q = blkdiag(Wq,Wr3);
             QN = Wq(1:nyN,1:nyN)*0;
             
@@ -444,6 +477,12 @@ function [input, data] = InitData(settings)
 
     switch settings.model
         case 'ActiveSeat_onlyP'
+            cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC\data\ActiveSeat_onlyP');
+            data.REF = AS_REF_onlyP(25,Ts);
+            data.PAR = AS_PAR(25,Ts);
+            cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC');
+            
+        case 'ActiveSeat_onlyP_Lin'
             cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC\data\ActiveSeat_onlyP');
             data.REF = AS_REF_onlyP(25,Ts);
             data.PAR = AS_PAR(25,Ts);

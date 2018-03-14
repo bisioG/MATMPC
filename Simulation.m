@@ -36,7 +36,7 @@ opt.qpsolver='qpoases'; %'qpoases', 'quadprog', 'hpipm_sparse', 'hpipm_dense'
 opt.condensing='full';  %'full'
 opt.hotstart='no'; %'yes','no' (only for qpoases)
 opt.shifting='no'; % 'yes','no'
-opt.lin_obj='no'; % 'yes','no' % if objective function is linear least square
+opt.lin_obj='yes'; % 'yes','no' % if objective function is linear least square
 opt.ref_type=1; % 0-time invariant, 1-time varying(no preview), 2-time varying (preview)
 
 %% Initialize Data (all users have to do this)
@@ -61,7 +61,7 @@ input_u = input.u0';
 
 while time(end) < Tf
     
-    if strcmp(settings.model,'ActiveSeat_onlyP')
+    if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')
         para0 = data.PAR(mem.iter,:)';
         para = repmat(para0,1,N+1);
         input.od=para;        
@@ -139,10 +139,13 @@ while time(end) < Tf
     if strcmp(settings.model,'ActiveSeat')
         input_u = [input_u; output.u(1:6,1)',xf(32)];
     end
-    
-   
+       
     if strcmp(settings.model,'ActiveSeat_onlyP') % xf(5) = pressY
         input_u = [input_u; xf(5)];
+    end
+    
+    if strcmp(settings.model,'ActiveSeat_onlyP_Lin') % xf(4) = pressY
+        input_u = [input_u; xf(4)];
     end
     
     % store the optimal solution and states
