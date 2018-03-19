@@ -31,7 +31,7 @@ M = 50; % massa in appoggio sul sedile
 
 t = linspace(0.005,N_sim/200,N_sim);
 ay = Ampl*sin(2*pi*fr*t);
-ax = Ampl*sin(2*pi*fr*t+(pi/2));
+ax = ay;
 
 %% ODE
 tspan = linspace(0.005,N_sim/200,N_sim); % tspan = Ts:Ts:N_sim/200;

@@ -1,6 +1,7 @@
 function [Yref] = AS_REF(Tf,Ts)
 
-    %% find your path to the original active seat model files
+    %% find your path to the original active seat model files (tesi Cunico)
+    old_path =pwd;
     addpath(genpath('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\nonlinear'));
     cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\nonlinear');
 
@@ -80,9 +81,7 @@ function [Yref] = AS_REF(Tf,Ts)
     end
 
     %% save your data in the path of your MATMPC
-    save('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC/data/ActiveSeat/AS_REF_DATA', 'REF_XY', 'REF_YX', 'rif_pressione');
-    
-    cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC');
+    save([old_path,'/AS_REF_DATA'], 'REF_XY', 'REF_YX', 'rif_pressione');
     
     clc;
 end

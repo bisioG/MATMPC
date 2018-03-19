@@ -15,7 +15,14 @@ function [input, data] = InitData(settings)
     nbx = settings.nbx;
     nbu = settings.nbu;
     nbu_idx = settings.nbu_idx;
-
+    
+    %**********************MODIFICA VELOCE PESI****************************
+    if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')
+        Wq_t(1) = 10;
+        Wr3_t(1)= 0.1;
+    end
+    %**********************************************************************
+    
     switch settings.model
         case 'ActiveSeat'
             
@@ -98,11 +105,11 @@ function [input, data] = InitData(settings)
             input.u0 = zeros(nu,1);
             para0 = [0 0 0];
 
-            Wq_t(1) = 10000; % peso sull'unica uscita pressione totale ypress
+%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
 
             Wq = diag(Wq_t); % diag matrix coi pesi
 
-            Wr3_t(1)= 0.0001;
+%             Wr3_t(1)= 0.1;
             Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
             Q = blkdiag(Wq,Wr3);
@@ -147,11 +154,11 @@ function [input, data] = InitData(settings)
             input.u0 = zeros(nu,1);
             para0 = [0 0 0];         
 
-            Wq_t(1) = 10000; % peso sull'unica uscita pressione totale ypress
+%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
 
             Wq = diag(Wq_t); % diag matrix coi pesi
 
-            Wr3_t(1)= 0.0001;
+%             Wr3_t(1)= 0.1;
             Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
             Q = blkdiag(Wq,Wr3);
@@ -196,11 +203,11 @@ function [input, data] = InitData(settings)
             input.u0 = zeros(nu,1);
             para0 = [0 0 0];         
 
-            Wq_t(1) = 10000; % peso sull'unica uscita pressione totale ypress
+%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
 
             Wq = diag(Wq_t); % diag matrix coi pesi
 
-            Wr3_t(1)= 0.0001;
+%             Wr3_t(1)= 0.1;
             Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
             Q = blkdiag(Wq,Wr3);
@@ -524,26 +531,31 @@ function [input, data] = InitData(settings)
     input.muN=zeros(ncN,1);
     input.mu_u = zeros(N*nu,1);
     %% Reference generation
-
+    main_folder= 'C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC';
     switch settings.model
         case 'ActiveSeat_onlyP'
-            cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC\data\ActiveSeat_onlyP');
+            cd([main_folder,'\data\ActiveSeat_onlyP']);
             data.REF = AS_REF_onlyP(25,Ts);
             data.PAR = AS_PAR(25,Ts);
-            cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC');
+            cd(main_folder);
             
         case 'ActiveSeat_onlyP_Lin'
-            cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC\data\ActiveSeat_onlyP');
+            cd([main_folder,'\data\ActiveSeat_onlyP']);
             data.REF = AS_REF_onlyP(25,Ts);
             data.PAR = AS_PAR(25,Ts);
-            cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC');
+            cd(main_folder);
             
         case 'ActiveSeat_onlyP_WOfriction'
-            cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC\data\ActiveSeat_onlyP');
+            cd([main_folder,'\data\ActiveSeat_onlyP']);
             data.REF = AS_REF_onlyP(25,Ts);
             data.PAR = AS_PAR(25,Ts);
-            cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC');
-            
+            cd(main_folder);
+        
+        case 'ActiveSeat'
+            cd([main_folder,'\data\ActiveSeat']);
+            data.REF = AS_REF(25,Ts);
+            cd(main_folder);
+                       
         case 'DiM'
 
             load REF_DiM_2;

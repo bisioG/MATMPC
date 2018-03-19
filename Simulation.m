@@ -61,7 +61,7 @@ input_u = input.u0';
 
 while time(end) < Tf
     
-    if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')
+    if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')
         para0 = data.PAR(mem.iter,:)';
         para = repmat(para0,1,N+1);
         input.od=para;        
@@ -178,7 +178,11 @@ Draw;
 
 %% save reference for ActiveSeat_onlyP
 if strcmp(settings.model,'ActiveSeat')
+    old_folder = pwd;
     save([pwd,'\data\ActiveSeat_onlyP\data_MPC_ActiveSeat_full'],'controls_MPC','state_sim');
+    cd([pwd,'\data\ActiveSeat_onlyP']);
+    make_onlyP_inputs();
+    cd(old_folder);
 end
 
 

@@ -1,7 +1,6 @@
 function [Yref] = AS_REF_onlyP(Tf,Ts)
 
     %% find your path to the original active seat model files
-    oldfolder = pwd;
 
 % %% Input signals assignment
     
@@ -15,9 +14,7 @@ for i=1:Tf/Ts
 end
 
     %% save your data in the path of your MATMPC
-    save([pwd,'\AS_REF_DATA_onlyP'], 'rif_pressione');
-    
-    cd(oldfolder); %return to main
+    save([pwd,'\AS_REF_DATA_onlyP'], 'rif_pressione');    
     
     clc;
 end

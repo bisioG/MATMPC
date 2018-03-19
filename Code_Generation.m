@@ -6,7 +6,13 @@ disp('---------------------------------------------');
 %% Insert Model here
 addpath([pwd,'/examples']);
 
-settings.model='ActiveSeat_onlyP_WOfriction'; % see the folder "examples" for details
+settings.model='ActiveSeat_onlyP'; % see the folder "examples" for details
+
+% Models:
+% ActiveSeat
+% ActiveSeat_onlyP
+% ActiveSeat_onlyP_Lin
+% ActiveSeat_onlyP_WOfriction
 
 run(settings.model);
 
