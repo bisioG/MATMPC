@@ -2,7 +2,6 @@ function [Yref] = AS_REF_onlyP(Tf,Ts)
 
     %% find your path to the original active seat model files
     oldfolder = pwd;
-%     cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\nonlinear');
 
 % %% Input signals assignment
     

@@ -1,4 +1,4 @@
-clear mex; close all;clc;
+clear mex;clc;
 
 %% Configuration (complete your configuration here...)
 addpath([pwd,'/nmpc']);

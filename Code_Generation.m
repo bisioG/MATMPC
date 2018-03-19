@@ -217,7 +217,7 @@ if strcmp(compile,'y')
 
 display('    Compilation completed!');
 
-end
+
 
 cd ..
 %% NMPC preparation
@@ -248,3 +248,5 @@ clear all;
 
 display('NMPC solver prepared! Enjoy solving...');
 display('                           ');
+
+end
