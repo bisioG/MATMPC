@@ -190,5 +190,5 @@ end
 
 %RMSE
 load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
-RMSE = sqrt( mean(rif_pressione(1:5000)-y_sim(:,1)').^2 )/0.016;
+RMSE = sqrt(immse(rif_pressione(1:5000), y_sim(:,1)'));
 disp(['RMSE: ', num2str(RMSE), '[Pa]' ]);

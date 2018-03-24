@@ -54,8 +54,8 @@ dpressY=controls(1);
 
 
 tmp1= (sqrt(prY2^2)*prY3) ;
-tmp2= m*accX*cos(pi/180*alpha)+MM*g*sin(pi/180*alpha) ;
-tmp3= 1/(pi)*atan(tmp2)+0.6 ;
+tmp2= m*accX*cos(pi/180*alpha)+MM*g*sin(pi/180*alpha) ; %Fn = normale al poggia schiena
+tmp3= 1/(pi)*atan(tmp2)+0.6 ;   %fuzione per annullare o meno attrito in presenza di contatto o meno con il sedile
 
 x_dot=[prY2;...
        -(c1*(10*prY1)^2+c2)/m*prY2-(k1*(10*prY1)^2+k2)*prY1/m+accY+g*roll-sigma_0*prY3/m; ...

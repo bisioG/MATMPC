@@ -1,4 +1,4 @@
-clear all;clc;
+% clear all;clc;
 disp('---------------------------------------------');
 disp('MATMPC is developed by Yutao Chen, DEI, UniPD');
 disp('---------------------------------------------');
@@ -6,7 +6,8 @@ disp('---------------------------------------------');
 %% Insert Model here
 addpath([pwd,'/examples']);
 
-settings.model='ActiveSeat_onlyP'; % see the folder "examples" for details
+
+% settings.model='ActiveSeat_onlyP'; % see the folder "examples" for details 
 
 % Models:
 % ActiveSeat

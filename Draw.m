@@ -99,7 +99,7 @@ switch settings.model
         hold on; grid on;
         plot(time(1:end),input_u(:,7)/0.016);
         plot(time(1:end-1),y_sim(:,19)/0.016);
-        legend('Actual lateral trunk pressure','Active seat trunk pressure','Pressure induced by platform motion')
+        legend('Reference lateral trunk pressure','Active seat trunk pressure','Pressure induced by platform motion')
         xlabel('time [s]'); ylabel('[Pa]');
         
     case 'ActiveSeat_onlyP'
@@ -111,7 +111,7 @@ switch settings.model
         plot(time(1:end-1),y_sim(:,1)/0.016);
         plot(time(1:end),input_u(:,1)/0.016);
         plot(time(1:end-1),(y_sim(:,1)/0.016)-(input_u(2:end,1)/0.016));
-        legend('Actual lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
+        legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
         xlabel('time [s]'); ylabel('[Pa]');
         
         
@@ -124,7 +124,7 @@ switch settings.model
         plot(time(1:end-1),y_sim(:,1)/0.016);
         plot(time(1:end),input_u(:,1)/0.016);
         plot(time(1:end-1),(y_sim(:,1)/0.016)-(input_u(2:end,1)/0.016));
-        legend('Actual lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
+        legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
         xlabel('time [s]'); ylabel('[Pa]');
         
         case 'ActiveSeat_onlyP_WOfriction'
@@ -136,7 +136,7 @@ switch settings.model
         plot(time(1:end-1),y_sim(:,1)/0.016);
         plot(time(1:end),input_u(:,1)/0.016);
         plot(time(1:end-1),(y_sim(:,1)/0.016)-(input_u(2:end,1)/0.016));
-        legend('Actual lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
+        legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
         xlabel('time [s]'); ylabel('[Pa]');
         
     case 'DiM'
