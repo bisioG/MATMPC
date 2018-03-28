@@ -6,7 +6,7 @@ clc;
 
 
 % parametri di test
-fr =0.2;
+fr =1/25;
 Amp = 10;
 ref_type = 1; % reference type 1= nonLinear 0=Linear 
 
@@ -32,8 +32,8 @@ end
     
 %% create input params accX,accY,roll for AS_onlyP _onlyP_Lin _onlyP_WOfriction
 rif_roll = zeros(length(accX));
-rif_accX = accX*0.5;
-rif_accY = accY*0.5;
+rif_accX = accX%*0.5;
+rif_accY = accY%*0.5;
 
 save([pwd,'\data\ActiveSeat_onlyP\rif_input_pres'],'rif_accX','rif_accY','rif_roll');
 
@@ -88,4 +88,4 @@ copyfile rif_pressione_calabogie.mat ..\.
 display('Draw compare plot');
 cd(main_matmpc_path);
 cd([pwd,'\Sinusoidal_test'])
-run draw_compare_test
+run draw_compare_test_1ref3mod

@@ -113,6 +113,7 @@ switch settings.model
         plot(time(1:end-1),(y_sim(:,1)/0.016)-(input_u(2:end,1)/0.016));
         legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
         xlabel('time [s]'); ylabel('[Pa]');
+        title(['Model:',settings.model]);
         
         
     case 'ActiveSeat_onlyP_Lin'
@@ -126,8 +127,9 @@ switch settings.model
         plot(time(1:end-1),(y_sim(:,1)/0.016)-(input_u(2:end,1)/0.016));
         legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
         xlabel('time [s]'); ylabel('[Pa]');
+        title(['Model:',settings.model]);
         
-        case 'ActiveSeat_onlyP_WOfriction'
+     case 'ActiveSeat_onlyP_WOfriction'
         % load the data you saved
         load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
         figure;        
@@ -138,6 +140,7 @@ switch settings.model
         plot(time(1:end-1),(y_sim(:,1)/0.016)-(input_u(2:end,1)/0.016));
         legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
         xlabel('time [s]'); ylabel('[Pa]');
+        title(['Model:',settings.model]);
         
     case 'DiM'
 

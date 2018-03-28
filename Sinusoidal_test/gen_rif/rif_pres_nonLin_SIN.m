@@ -26,6 +26,7 @@ v_s = 0.005;
 
 alpha = 10; % angolo inclinazione sedile
 M = 50; % massa in appoggio sul sedile
+A = 0.016;
 
 % parametri sinusoide ax,ay
 
@@ -44,16 +45,16 @@ ode_function = @(t,y) odefun_nonlin(t,y,tspan,ay,m,k1,k2,c1,c2,sigma_0,v_s,alpha
 %% Calcolo uscite
 for i = 1:N_sim
     k(i) = k1*(10*y(i,1)).^2+k2;
-    F_pres(i) = k(i)*y(i,1); % pressione
+    c(i) = c1*(10*y(i,1)).^2+c2;
+    F_pres(i) = ((k(i)-k2)*y(i,1));%+((c(i)-c2)*y(i,2)); % forza di pressione
     
-    F_att(i) = sigma_0*y(i,3)+sigma_2*y(i,2); % forza di attrito
 end
 
 
-rif_pressione= F_pres/0.016;
+rif_pressione= F_pres/A;
 
 
-%% save rif_pressione_calabogie_fr
+%% save rif_pressione as rif_pressione_calabogie
 cd('..\');
 cd('..\');
 save([pwd,'\data\ActiveSeat_onlyP\rif_pressione_calabogie'],'rif_pressione');

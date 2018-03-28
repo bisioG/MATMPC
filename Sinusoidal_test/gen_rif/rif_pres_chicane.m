@@ -17,8 +17,8 @@ ay = -IN1_YX(1:N_sim)*g; % trasformo in m/s^2
 m = 67;
 k1 = 12000;
 k2 = 1000;
-c1 = 4000;
-c2 = 400;
+c1 = 200;
+c2 = 2000;
 
 % parametri modello di attrito
 Fs = 45;
@@ -39,14 +39,14 @@ M = 50; % massa in appoggio sul sedile
 tspan = linspace(0.005,N_sim/200,N_sim); % tspan = Ts:Ts:N_sim/200;
 y0 = [0;0;0]; % cond iniziali
 
-ode_function = @(t,y) odefun_acado_chicane(t,y,tspan,ay,m,k1,k2,c1,c2,sigma_0,v_s,alpha,M,ax,g,Fs,Fc);
+ode_function = @(t,y) odefun_nonlin(t,y,tspan,ay,m,k1,k2,c1,c2,sigma_0,v_s,alpha,M,ax,g,Fs,Fc);
 [t,y] = ode23(ode_function, tspan, y0); %  (funzione da integrare, intervallo di integrazione, cond iniziali)
 
 
 %% Calcolo uscite
 for i = 1:N_sim
     k(i) = k1*(10*y(i,1)).^2+k2;  
-    pres(i) = k(i)*y(i,1); % pressione
+    F_pres(i) = k(i)*y(i,1); % forza elastica 
     
     F_att(i) = sigma_0*y(i,3)+sigma_2*y(i,2); % forza di attrito
 end
@@ -65,7 +65,7 @@ xlabel('time [s]')
 figure
 plot(tt,m*ay)
 hold on
-plot(tt,pres)
+plot(tt,F_pres)
 plot(tt,F_att,'k')
 legend('may','kx','friction force')
 xlabel('time [s]')
@@ -74,7 +74,7 @@ title('Nonlinear lateral model')
 
 
 %%
-rif_pressione = pres/0.016;
+rif_pressione = F_pres/0.016;
 figure
 plot(rif_pressione)
 legend('rif pressione chicane')

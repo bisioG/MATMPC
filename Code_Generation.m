@@ -7,7 +7,7 @@ disp('---------------------------------------------');
 addpath([pwd,'/examples']);
 
 
-% settings.model='ActiveSeat_onlyP'; % see the folder "examples" for details 
+%  settings.model='ActiveSeat_onlyP_2'; % see the folder "examples" for details 
 
 % Models:
 % ActiveSeat
