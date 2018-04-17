@@ -1,79 +1,54 @@
-% Modello nonlineare con modello di attrito di de Wit, i parametri F_c e 
+% Crea un riferimento NONlineare con modello di attrito di de Wit, i parametri F_c e 
 % F_s variano secondo l'accelerazione longitudinale 
+
 clc
 clear
 % close all
 
 
-%% parametri modello
+%% parametri simulazione
 N_sim = 5000;
 Ts = 0.005;
 
-% parametri modello pressorio
-g = 9.81;
+%% parametri modello pressorio
+current_path =pwd;
+cd ('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC\examples');
+run Pressure_model_params
+cd(current_path);
+
+A = 0.016; %area di contatto
+
+%% carico dati di simulazione
 load ay.mat
-ay = IN1_YX(1:N_sim)*g; % trasformo in m/s^2
-m = 67;
-k1 = 12000;
-k2 = 1000;
-c1 = 200;
-c2 = 2000;
-
-% parametri modello di attrito
-Fs = 45;
-Fc = 30;
-sigma_0 = 10^4;
-sigma_1 = 0;
-sigma_2 = 0;
-v_s = 0.005;
-
-% parametri per accoppiamento con accelerazione long.
 load ax.mat
 ax = IN1_XY(1:N_sim)*g;
-alpha = 10; % angolo inclinazione sedile
-M = 50; % massa in appoggio sul sedile
-
+ay = IN1_YX(1:N_sim)*g; % trasformo in m/s^2
 
 %% ODE
 tspan = linspace(0.005,N_sim/200,N_sim); % tspan = Ts:Ts:N_sim/200;
 y0 = [0;0;0]; % cond iniziali
 
-ode_function = @(t,y) odefun_acado_calabogie(t,y,tspan,ay,m,k1,k2,c1,c2,sigma_0,v_s,alpha,M,ax,g,Fs,Fc);
+ode_function = @(t,y) odefun_nonlin(t,y,tspan,ay,m,k1,k2,c1,c2,sigma_0,vs,alpha,MM,ax,g,Fs,Fc);
 [t,y] = ode23(ode_function, tspan, y0); %  (funzione da integrare, intervallo di integrazione, cond iniziali)
 
 
 %% Calcolo uscite
 for i = 1:N_sim
-    k(i) = k1*(10*y(i,1)).^2+k2;
-    pres(i) = k(i)*y(i,1); % pressione
+    k(i) = k1*(y(i,1)).^2+k2;
+    c(i)= c1*(y(i,1)).^2+c2;
     
-    F_att(i) = sigma_0*y(i,3)+sigma_2*y(i,2); % forza di attrito
+    Output_NL(i)=((k(i)-k2)*y(i,1)) + ((c(i)-c2)*y(i,2));
+    
 end
 
-%% PLOT
 
+rif_pressione = Output_NL/A;
+
+
+%% plot
 tt=Ts:Ts:N_sim*Ts;
-
 figure
-plot(tt,IN1_YX(1:N_sim)*g)
-hold on
-plot(tt,y(:,1:2))
-legend('a_y','x','x''')
-xlabel('time [s]')
+plot(tt,rif_pressione)
+legend('rif pressione calabogie NON Lineare')
 
-figure
-plot(tt,m*IN1_YX(1:N_sim)*g)
-hold on
-plot(tt,pres)
-plot(tt,F_att,'k')
-legend('may','kx','friction force')
-xlabel('time [s]')
-ylabel('force [N]')
-title('Nonlinear lateral model')
-
-
-%%
-rif_pressione = pres/0.016;
-figure
-plot(rif_pressione)
-legend('rif pressione calabogie')
+%  save('rif_pressione_calabogie','rif_pressione)

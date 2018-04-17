@@ -147,7 +147,7 @@ while time(end) < Tf
     if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction') % xf(4) = pressY
         input_u = [input_u; xf(4)];
     end
-    
+      
     % store the optimal solution and states
     controls_MPC = [controls_MPC; output.u(:,1)'];
     state_sim = [state_sim; xf'];
@@ -155,7 +155,7 @@ while time(end) < Tf
     % go to the next sampling instant
     nextTime = mem.iter*Ts; 
     mem.iter = mem.iter+1;
-%     disp(['current time:' num2str(nextTime) '  CPT:' num2str(cpt) 'ms  MULTIPLE SHOOTING:' num2str(tshooting) 'ms  COND:' num2str(tcond) 'ms  QP:' num2str(tqp) 'ms  KKT:' num2str(KKT) '  SQP_IT:' num2str(output.info.iteration_num)]);
+    disp(['current time:' num2str(nextTime) '  CPT:' num2str(cpt) 'ms  MULTIPLE SHOOTING:' num2str(tshooting) 'ms  COND:' num2str(tcond) 'ms  QP:' num2str(tqp) 'ms  KKT:' num2str(KKT) '  SQP_IT:' num2str(output.info.iteration_num)]);
         
     time = [time nextTime];
     
@@ -167,6 +167,13 @@ if strcmp(opt.qpsolver, 'qpoases')
     qpOASES_sequence( 'c', mem.warm_start);
 end
 clear mex;
+
+%% numerical elaboration cases
+
+ if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,'ActiveSeat_onlyP')
+     run Num_elab
+ end
+ 
 
 %% draw pictures (optional)
 display('                           ');

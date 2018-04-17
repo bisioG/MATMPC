@@ -104,43 +104,46 @@ switch settings.model
         
     case 'ActiveSeat_onlyP'
         % load the data you saved
+        A=0.016; %area di contatto
         load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
         figure;        
-        plot(time(1:end-1),rif_pressione(1:Tf/0.005)/0.016) % 0.016 è l'area del cuscinetto
+         plot(time(1:end-1),rif_pressione(1:Tf/0.005)/A,'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
         hold on; grid on;
-        plot(time(1:end-1),y_sim(:,1)/0.016);
-        plot(time(1:end),input_u(:,1)/0.016);
-        plot(time(1:end-1),(y_sim(:,1)/0.016)-(input_u(2:end,1)/0.016));
-        legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
+         plot(time(1:end-1),y_sim(:,1)/A,'r','Linewidth',1);
+          plot(time(1:end-1),u_true/A,'m','Linewidth',1);
+        plot(time(1:end-1),platform_p/A,'k--','Linewidth',1);
+        legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure (by difference)','Pressure induced by platform motion')
         xlabel('time [s]'); ylabel('[Pa]');
-        title(['Model:',settings.model]);
+        title('Model: ActiveSeat OnlyP');
         
         
     case 'ActiveSeat_onlyP_Lin'
         % load the data you saved
+        A=0.016; %area di contatto
         load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
         figure;        
-        plot(time(1:end-1),rif_pressione(1:Tf/0.005)/0.016) % 0.016 è l'area del cuscinetto
+         plot(time(1:end-1),rif_pressione(1:Tf/0.005)/A,'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
         hold on; grid on;
-        plot(time(1:end-1),y_sim(:,1)/0.016);
-        plot(time(1:end),input_u(:,1)/0.016);
-        plot(time(1:end-1),(y_sim(:,1)/0.016)-(input_u(2:end,1)/0.016));
-        legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
+         plot(time(1:end-1),y_sim(:,1)/A,'r','Linewidth',1);
+          plot(time(1:end-1),u_true/A,'m','Linewidth',1);
+        plot(time(1:end-1),platform_p/A,'k--','Linewidth',1);
+        legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure (by difference)','Pressure induced by platform motion')
         xlabel('time [s]'); ylabel('[Pa]');
-        title(['Model:',settings.model]);
+        title('Model: ActiveSeat OnlyP Linear');
         
      case 'ActiveSeat_onlyP_WOfriction'
         % load the data you saved
+        A=0.016; %area di contatto
         load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
         figure;        
-        plot(time(1:end-1),rif_pressione(1:Tf/0.005)/0.016) % 0.016 è l'area del cuscinetto
+         plot(time(1:end-1),rif_pressione(1:Tf/0.005)/A,'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
         hold on; grid on;
-        plot(time(1:end-1),y_sim(:,1)/0.016);
-        plot(time(1:end),input_u(:,1)/0.016);
-        plot(time(1:end-1),(y_sim(:,1)/0.016)-(input_u(2:end,1)/0.016));
-        legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure','Pressure induced by platform motion')
+         plot(time(1:end-1),y_sim(:,1)/A,'r','Linewidth',1);
+          plot(time(1:end-1),u_true/A,'m','Linewidth',1);
+        plot(time(1:end-1),platform_p/A,'k--','Linewidth',1);
+        legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure (by difference)','Pressure induced by platform motion')
         xlabel('time [s]'); ylabel('[Pa]');
-        title(['Model:',settings.model]);
+        title('Model: ActiveSeat OnlyP WOfriction');
         
     case 'DiM'
 

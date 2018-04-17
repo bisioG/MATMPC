@@ -93,18 +93,22 @@ D = [D_p, zeros(size(D_p,1),1)];
 
 A=[A,zeros(30,2)];
 
-m = 67;
-sigma_0 = 10^4;
-vs = 0.005;
-Fs = 45;
-Fc = 30;
-g = 9.81;
-alpha = 10;
-MM = 50;
-k1 = 12000;
-k2 = 1000;
-c1 = 200;
-c2 = 2000;
+
+%% pressure model params
+run Pressure_model_params_nonLin
+
+% m = 67;
+% sigma_0 = 10^4;
+% vs = 0.005;
+% Fs = 45;
+% Fc = 30;
+% g = 9.81;
+% alpha = 10;
+% MM = 50;
+% k1 = 12000;
+% k2 = 1000;
+% c1 = 200;
+% c2 = 2000;
 
 %% Dimensions
 
@@ -179,9 +183,9 @@ tmp3= 1/(pi)*atan(tmp2)+0.6 ;
 
 x_dot=[A(1:27,:)*states+B(1:27,:)*controls;...
        prY2;...
-       -(c1*(10*prY1)^2+c2)/m*prY2-(k1*(10*prY1)^2+k2)*prY1/m+accY+g*roll-sigma_0*prY3/m; ...
+       -(c1*(prY1)^2+c2)/m*prY2-(k1*(prY1)^2+k2)*prY1/m+accY+g*roll-sigma_0*prY3/m; ...
        prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
-       200*k1*prY1^2*prY2+(100*k1*prY1^2)*prY2+dpressY;...
+       2*k1*prY1^2*prY2+(k1*prY1^2)*prY2+dpressY;...
        dpressY];              
        
  

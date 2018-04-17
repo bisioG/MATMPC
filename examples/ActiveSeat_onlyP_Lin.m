@@ -1,20 +1,7 @@
 
 %% usefull from here
 
-m = 67;
-% sigma_0 = 10^4;
-% vs = 0.005;
-% Fs = 45;
-% Fc = 30;
-g = 9.81;
-alpha = 10;
-MM = 50;
-% k1 = 12000;
-% k2 = 1000;
-% c1 = 200;
-% c2 = 2000;
-k =20000; %params from Cunico
-c = 1300;
+run Pressure_model_params_Lin
 
 %% Dimensions
 
@@ -54,13 +41,9 @@ pressY=states(4);
 dpressY=controls(1);
 
 
-% tmp1= (sqrt(prY2^2)*prY3) ;
-% tmp2= m*accX*cos(pi/180*alpha)+MM*g*sin(pi/180*alpha) ;
-% tmp3= 1/(pi)*atan(tmp2)+0.6 ;
-
 x_dot=[prY2;...
-       -c/m*prY2-k*prY1/m+accY+g*roll; ...               
-       k*prY2+dpressY;...
+       -c2/m*prY2-k2*prY1/m+accY+g*roll; ...               
+       k2*prY2+dpressY;...
        dpressY];
    
  

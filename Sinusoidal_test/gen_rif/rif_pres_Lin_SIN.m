@@ -1,32 +1,19 @@
 function [ rif_pressione, ax, ay ] = rif_pres_Lin_SIN(Amp, fr)
 % Modello nonlineare riferimento pressione di tipo sinusoidale per test
 
-%% parametri modello
+%% parametri simulazione
+
 N_sim = 5000;
 Ts = 0.005;
 
-% parametri modello pressorio
-g = 9.81;
+% parametri modello pressorio gli stessi con cui creo il modello mpc
 
-m = 67;
-k1 = 12000;
-k2 = 1000;
-c1 = 200;
-c2 = 2000;
+current_path =pwd;
+cd ('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC\examples');
+run Pressure_model_params_Lin
+cd(current_path);
 
-% parametri modello di attrito
-Fs = 45;
-Fc = 30;
-sigma_0 = 10^4;
-sigma_1 = 0;
-sigma_2 = 0;
-v_s = 0.005;
-
-% parametri per accoppiamento con accelerazione long.
-
-alpha = 10; % angolo inclinazione sedile
-M = 50; % massa in appoggio sul sedile
-A = 0.016;
+A = 0.016; %area di contatto
 
 % parametri sinusoide ax,ay
 
@@ -36,22 +23,23 @@ ax = ay;
 
 %% ODE
 tspan = linspace(0.005,N_sim/200,N_sim); % tspan = Ts:Ts:N_sim/200;
-y0 = [0;0;0]; % cond iniziali
+y0 = [0;0]; % cond iniziali
 
-ode_function = @(t,y) odefun_nonlin(t,y,tspan,ay,m,k1,k2,c1,c2,sigma_0,v_s,alpha,M,ax,g,Fs,Fc);
+ode_function = @(t,y) odefun_lin(t,y,tspan,ay,m,k2,c2);
 [t,y] = ode23(ode_function, tspan, y0); %  (funzione da integrare, intervallo di integrazione, cond iniziali)
 
 
 %% Calcolo uscite
 for i = 1:N_sim
-    k(i) = k2;
-    F_pres(i) = k(i)*y(i,1)+ c(i)*y(i,2); % pressione
+
+    F_pres_Lin(i) = k2*y(i,1); % forza di pressione
+    damping_Lin(i) = c2*y(i,2);
+    
+    Output_L(i) = (F_pres_Lin(i)+damping_Lin(i)); %come forza premente 
     
 end
 
-
-rif_pressione= F_pres/A;
-
+rif_pressione = Output_L;
 
 %% save rif_pressione as rif_pressione_calabogie
 cd('..\');
