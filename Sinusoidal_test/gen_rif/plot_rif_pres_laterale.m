@@ -8,8 +8,8 @@
 
     figure
     plot(tt,m*ay,'g','Linewidth',1)
-%     xlim([0 3])
-    xlim([0 3*1/fr])
+     xlim([0 3])
+%     xlim([0 3*1/fr])
     hold on
     plot(tt,Output_NL,'r--','Linewidth',1)
     plot(tt,Output_L,'b--','Linewidth',1)

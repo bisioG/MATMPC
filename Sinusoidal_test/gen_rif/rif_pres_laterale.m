@@ -14,9 +14,9 @@ Ts = 0.005;
 t = linspace(0.005,N_sim/200,N_sim);
 
 Amp = 10;
-fr = 1;
- ay = Amp*sin(2*pi*fr*t);
-% ay = [zeros(1,100) Amp*ones(1,(length(t)-100))];
+fr = 0;
+%  ay = Amp*sin(2*pi*fr*t);
+ ay = [zeros(1,100) Amp*ones(1,(length(t)-100))];
 
 ax = ay;
 
@@ -95,6 +95,13 @@ cd ('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC\examples');
 run Pressure_model_params_Lin
 cd(current_path);
 
+%new c2,k2 value
+
+c2=2000;
+k2=1000;
+
+%********************
+
 A = 0.016; %area di contatto
 
 tspan = linspace(0.005,N_sim/200,N_sim); % tspan = Ts:Ts:N_sim/200;
@@ -127,15 +134,15 @@ Output_L = F_pres_Lin+damping_Lin;
 
 %% plots
 
-%  run plot_rif_pres_laterale
+%   run plot_rif_pres_laterale
 
 %% plot stifness lineare
 
- run lin_stifness_plot
+%  run lin_stifness_plot
 
 %% plot damping lineare
 
- run lin_damping_plot
+%  run lin_damping_plot
 
 
 
