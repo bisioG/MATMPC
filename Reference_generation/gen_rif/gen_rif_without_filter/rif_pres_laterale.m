@@ -1,24 +1,49 @@
-
+% GENERAZIONE DEL RIFERIMENTO DI PRESSIO SENZA FILTRO PASSA ALTO
 %  Creazione del Modello nonlineare riferimento 
 
 clear all;
 clc;
 close all;
-%% parametri simulazione
+
+%% parametri comuni della simulazione
 
 N_sim = 5000;
 Ts = 0.005;
-
-%% parametri ax,ay *******************************************************
-
 t = linspace(0.005,N_sim/200,N_sim);
 
-Amp = 10;
-fr = 0;
-%  ay = Amp*sin(2*pi*fr*t);
- ay = [zeros(1,100) Amp*ones(1,(length(t)-100))];
+%% parametri ax,ay  SINUSOIDE *******************************************************
 
-ax = ay;
+% param_name = 'Sinusoidal';
+% Amp = 10;
+% fr = 5;
+% ay = Amp*sin(2*pi*fr*t);
+% ax = ay;
+
+%% parametri ax,ay GRADINO ************************************************************
+
+% param_name = 'Step';
+% Amp = 10;
+% ay = [zeros(1,100) Amp*ones(1,(length(t)-100))];
+% ax = ay;
+
+%% parametri ax,ay CALABOGIE *********************************************************
+
+param_name = 'Calabogie track';
+g=9.81;
+load ('acc_data\ay.mat')
+load ('acc_data\ax.mat')
+ax = IN1_XY(1:N_sim)*g;
+ay = IN1_YX(1:N_sim)*g; % trasformo in m/s^2
+
+%% parametri ax,ay CHICANE **********************************************************
+
+% param_name = 'Chicane section';
+% g =9.81;
+% load ('acc_data\ay2.mat')
+% load ('acc_data\ax2.mat')
+% ay = -IN1_YX(1:N_sim)*g; % trasformo in m/s^2
+% ax = IN1_XY(1:N_sim)*g;
+
 
 %% ODE nonLin
 

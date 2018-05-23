@@ -1,5 +1,8 @@
 %% scrip per plottare il comportamento dello smorzamento lineare e confrontarlo con il nonlineare
 
+legend_size=12; %LEGEND SIZE SETTINGS
+title_size=19;  %TITLE SIZE SETTINGS
+
 % parametri di partenza
 c1=20000;
 c2=2000;
@@ -49,5 +52,6 @@ plot(x,k_lin*ones(1,length(x)),'g','Linewidth',1)
  line([-x_hlim -x_hlim], [0 3000],'Color','red','LineStyle','--','Linewidth',1)
  line([-0.1 0.1], [c_hlim c_hlim],'Color','black','LineStyle','--','Linewidth',1)
  line([-0.1 0.1], [c_llim c_llim],'Color','black','LineStyle','--','Linewidth',1)
-legend('c(x)','c = 500', ['c'' = ',num2str(k_lin)])
-title(['Damping function,Input signal fr=',num2str(fr),'[Hz] A=',num2str(Amp),'[m/s^2]']);
+lgd = legend('c(x)','c = 500', ['c'' = ',num2str(k_lin)])
+lgd.FontSize= legend_size;
+title(['Damping function,Input signal fr=',num2str(fr),'[Hz] A=',num2str(Amp),'[m/s^2]'],'FontSize',title_size);

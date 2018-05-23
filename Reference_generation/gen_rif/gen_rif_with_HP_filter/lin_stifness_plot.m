@@ -1,5 +1,8 @@
 %% scrip per plottare il comportamento della rigidezza lineare e confrontarlo con il nonlineare
- 
+
+legend_size=12; %LEGEND SIZE SETTINGS
+title_size=19;  %TITLE SIZE SETTINGS
+
 % parametri di partenza
 k1=1200000;
 k2=1000;
@@ -41,5 +44,6 @@ plot(x,k_lin*ones(1,length(x)),'g','Linewidth',1)
  line([-x_hlim -x_hlim], [-2000 14000],'Color','red','LineStyle','--','Linewidth',1)
  line([-0.1 0.1], [k_hlim k_hlim],'Color','black','LineStyle','--','Linewidth',1)
  line([-0.1 0.1], [k_llim k_llim],'Color','black','LineStyle','--','Linewidth',1)
-legend('k(x)','k = 6000', ['k'' = ',num2str(k_lin)])
-title(['Spring function,Input signal fr=',num2str(fr),'[Hz] A=',num2str(Amp),'[m/s^2]']);
+lgd = legend('k(x)','k = 6000', ['k'' = ',num2str(k_lin)]);
+lgd.FontSize = legend_size;
+title(['Spring function,Input signal fr=',num2str(fr),'[Hz] A=',num2str(Amp),'[m/s^2]'],'FontSize',title_size);
