@@ -2,6 +2,7 @@
 
 % %Pressure model params Yutao
 % 
+% A = 0.016;          %area di contatto       
 % MM = 50;            %massa busto e braccia
 % m = 67;             %massa che interviene nella dinamica
 % k1 = 12000;         %parametri forza elastica k1*(10*dy)^2+k2  NOTARE FATTORE 100
@@ -17,6 +18,7 @@
 
 %Pressure model params AMC18
 
+% A = 0.016;          %area di contatto       
 % MM = 50;            %massa busto e braccia
 % m = 67;             %massa che interviene nella dinamica
 % k1 = 1000;          %parametri forza elastica k1*dy^2+k2
@@ -32,6 +34,7 @@
 
 %Pressure model params current
 
+A = 0.016;          %area di contatto       
 MM = 50;            %massa busto e braccia
 m = 67;             %massa che interviene nella dinamica
 k1 = 12000*100;     %parametri forza elastica k1*(*dy)^2+k2  
@@ -46,5 +49,10 @@ Fc = 30;            %coefficente di attrito dinamico (coulomb)
 g = 9.81;       
 
 
+%% ****** FILTERS PARAMs *****
+
+% HIGH PASS FILTER
+
+tau_hp = 21; %[sec]
 
 

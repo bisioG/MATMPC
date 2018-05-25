@@ -1,0 +1,4 @@
+copy to folder:
+MATMPC\data\ActiveSeat_onlyP 
+
+in order to simulate with this reference

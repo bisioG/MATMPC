@@ -1,3 +1,5 @@
+%mi crea il vettore di parametri (provenienti dal vestibolare) dal file MPC sul sistema globale
+
 function make_onlyP_inputs()
     load data_MPC_ActiveSeat_full.mat
     rif_daccX =[];

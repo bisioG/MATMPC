@@ -4,7 +4,7 @@ run Pressure_model_params_nonLin
 
 %% Dimensions
 
-nx=5;       % No. of states
+nx=7;       % No. of states
 nu=1;       % No. of controls
 ny=2;       % No. of outputs
 nyN=1;      % No. of outputs at the terminal point
@@ -36,7 +36,9 @@ prY1=states(1);
 prY2=states(2); 
 prY3=states(3); 
 y_press=states(4); 
-pressY=states(5); 
+pressY=states(5);
+x_hp = states(6);
+y_press_hp = states(7);
 
 dpressY=controls(1);
 
@@ -48,8 +50,10 @@ tmp3= 1/(pi)*atan(tmp2)+0.6 ;   %fuzione per annullare o meno attrito in presenz
 x_dot=[prY2;...
        -(c1*(prY1)^2+c2)/m*prY2-(k1*(prY1)^2+k2)*prY1/m+accY+g*roll-sigma_0*prY3/m; ...
        prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
-       [2*k1*prY1^2*prY2+(k1*prY1^2)*prY2]/A+dpressY;... 
-       dpressY];
+       2*k1*prY1^2*prY2+(k1*prY1^2)*prY2;... 
+       dpressY;...
+       (-1/tau_hp)*x_hp+y_press/A;...
+       (-1/tau_hp)*x_hp+y_press/A+pressY];
    
  
 xdot = SX.sym('xdot',nx,1);
@@ -58,7 +62,7 @@ impl_f = xdot - x_dot;
 %% Objectives and constraints
 
 % objectives
-h = [y_press; pressY ];
+h = [y_press_hp; pressY ];
 
 hN=[pressY]; %generic state 
 

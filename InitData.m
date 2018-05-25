@@ -16,12 +16,14 @@ function [input, data] = InitData(settings)
     nbu = settings.nbu;
     nbu_idx = settings.nbu_idx;
     
-    %**********************MODIFICA VELOCE PESI****************************
-    if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')
+ %% **********************MODIFICA VELOCE PESI****************************
+    if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_HP')
         Wq_t(1) = 10;
         Wr3_t(1)= 0.1;
     end
-    %**********************************************************************
+%% ************************IMPOSTAZIONE PESI E LIMITI *************************
+
     
     switch settings.model
         case 'ActiveSeat'
@@ -148,7 +150,56 @@ function [input, data] = InitData(settings)
             input.lbu = repmat(lbu,1,N);
             input.ubu = repmat(ubu,1,N);
             
-            case 'ActiveSeat_onlyP_Lin'
+        case 'ActiveSeat_onlyP_HP'
+            
+            input.x0 = [0, 0.0001, 0, 0, 0, 0, 0]'; %AGGIUNTA DUE STATI
+            input.u0 = zeros(nu,1);
+            para0 = [0 0 0];
+    
+%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
+
+            Wq = diag(Wq_t); % diag matrix coi pesi
+
+%             Wr3_t(1)= 0.1;
+            Wr3 = diag(Wr3_t); % diag matrix coi pesi
+            
+            Q = blkdiag(Wq,Wr3);
+            QN = Wq(1:nyN,1:nyN)*0;
+            
+            
+            % upper and lower bounds for states (=nbx)
+            
+            lb_x = [];%-inf(nu,1);
+            ub_x = [];%-lb_x;
+
+            % upper and lower bounds for controls (=nbu)           
+            lb_u = [];
+            ub_u = [];
+                       
+            % upper and lower bounds for general constraints (=nc)
+            lb_g = [];
+            ub_g = [];            
+            lb_gN = [];
+            ub_gN = [];
+
+            % store the constraint data into input
+            
+            input.lb=repmat([lb_g;lb_x],1,N);
+            input.ub=repmat([ub_g;ub_x],1,N); 
+            nput.lbN=[lb_gN;lb_x];               
+            input.ubN=[ub_gN;ub_x]; 
+            
+            lbu = -inf(nu,1);
+            ubu = inf(nu,1);
+            for i=1:nbu
+                lbu(nbu_idx(i)) = lb_u(i);
+                ubu(nbu_idx(i)) = ub_u(i);
+            end
+            
+            input.lbu = repmat(lbu,1,N);
+            input.ubu = repmat(ubu,1,N);
+            
+      case 'ActiveSeat_onlyP_Lin'
             
             input.x0 = [0, 0.0001, 0, 0]';
             input.u0 = zeros(nu,1);
@@ -197,7 +248,7 @@ function [input, data] = InitData(settings)
             input.lbu = repmat(lbu,1,N);
             input.ubu = repmat(ubu,1,N);
             
-        case 'ActiveSeat_onlyP_WOfriction'
+      case 'ActiveSeat_onlyP_WOfriction'
             
             input.x0 = [0, 0.0001, 0, 0]';
             input.u0 = zeros(nu,1);
@@ -246,258 +297,10 @@ function [input, data] = InitData(settings)
             input.lbu = repmat(lbu,1,N);
             input.ubu = repmat(ubu,1,N);
             
-            
-        case 'DiM'
-            input.x0 = zeros(nx,1);    % initial state
-            input.u0 = zeros(nu,1);    % initial control
-            para0 = 0;  % initial parameters (by default a np by 1 vector, if there is no parameter, set para0=0)
-
-            %weighting matrices
-            Q=diag([1200,1200,2000,800,800,5800,... % perceived acc and angular vel
-                    32000*1.1,32000*1.1,1600*1,... %px,py,pz hex
-                    3200*1.1,3200*1.1,2000*1,... %vx, vy, vz hex
-                    4600*1,600*1,... % x,y tri
-                    850*1,850*1,... % vx,vy tri
-                    3700,3000,1500,... % phi, theta, psi hex
-                    750,... % phi tri
-                    0.01,0.0,0.0,... % omega phi,theta,psi hex
-                    500.0,... % omega phi tri
-                    0.0,0.0,0.001,... %ax,ay,az hex %         20*1.1,20*1.1,... % ax,ay tri
-                    0.0,0.01,0.1 ... % alpha phi,theta, psi hex 
-                    ]);
-
-              QN=Q(1:nyN,1:nyN);
-              
-              % upper and lower bounds for states (=nbx)
-              lb_x = [];
-              ub_x = [];
-              lb_xN = [];
-              ub_xN = [];
-              
-              % upper and lower bounds for controls (=nbu)           
-              lb_u = [];
-              ub_u = [];
-
-              % upper and lower bounds for general constraints (=nc)
-              lb_g=[1.045;1.045;1.045;1.045;1.045;1.045];    % lower bounds for ineq constraints
-              ub_g=[1.3750;1.3750;1.3750;1.3750;1.3750;1.3750];  % upper bounds for ineq constraints
-              lb_gN=[1.045;1.045;1.045;1.045;1.045;1.045];  % lower bounds for ineq constraints at terminal point
-              ub_gN=[1.3750;1.3750;1.3750;1.3750;1.3750;1.3750];  % upper bounds for ineq constraints at terminal point
-              
-        case 'InvertedPendulum'
-            input.x0 = [0;pi;0;0];    
-            input.u0 = zeros(nu,1);    
-            para0 = 0;  
-
-            Q=diag([10 10 0.1 0.1 0.01]);
-            QN=Q(1:nyN,1:nyN);
-
-            % upper and lower bounds for states (=nbx)
-            lb_x = -2;
-            ub_x = 2;
-            lb_xN = -2;
-            ub_xN = 2;
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = -20;
-            ub_u = 20;
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-        case 'ChainofMasses_Lin'
-            n=15;
-            data.n=n;
-            input.x0=zeros(nx,1);
-            for i=1:n
-                input.x0(i)=7.5*i/n;
-            end
-            input.u0=zeros(nu,1);
-            para0=0;
-            wv=[];wx=[];wu=[];
-            wu=blkdiag(wu,0.1, 0.1, 0.1);
-            for i=1:3
-                wx=blkdiag(wx,25);
-                wv=blkdiag(wv,diag(0.25*ones(1,n-1)));
-            end
-            Q=blkdiag(wx,wv,wu);
-            QN=blkdiag(wx,wv);
-
-            % upper and lower bounds for states (=nbx)
-            lb_x = [];
-            ub_x = [];
-            lb_xN = [];
-            ub_xN = [];
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [-1;-1;-1];
-            ub_u = [1;1;1];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-        case 'ChainofMasses_NLin'
-            n=10;
-            data.n=n;
-            x0=[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 zeros(1,nx-n)]';
-%             input.x0=[rand(1,n), 0.6*rand(1,n)-1, -0.6*rand(1,n) , zeros(1,3*(n-1))]';
-            input.u0=zeros(nu,1);
-            para0=0;
-            wv=[];wx=[];wu=[];
-            wu=blkdiag(wu,0.01, 0.01, 0.01);
-            for i=1:3
-                wx=blkdiag(wx,25);
-                wv=blkdiag(wv,diag(1*ones(1,n-1)));
-            end
-            Q=blkdiag(wx,wv,wu);
-            QN=blkdiag(wx,wv);
-
-            % upper and lower bounds for states (=nbx)
-            lb_x = [];
-            ub_x = [];
-            lb_xN = [];
-            ub_xN = [];
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [-1;-1;-1];
-            ub_u = [1;1;1];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-        case 'Hexacopter'
-            input.x0=zeros(nx,1);
-            input.u0=zeros(nu,1);
-            para0=0;
-            
-            q = [5e0, 5e0, 5e0, 0.1, 0.1, 0.1];
-            qN = q(1:nyN);
-            Q = diag(q);
-            QN = diag(qN);
-
-            % upper and lower bounds for states (=nbx)
-            lb_x = [];
-            ub_x = [];
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = -inf*ones(nbu,1);
-            ub_u = inf*ones(nbu,1);
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-        case 'TiltHex'
-            input.x0=zeros(nx,1);
-            input.u0=zeros(nu,1);
-            para0=0;
-
-            q =[5,5,5,0.1,1,0.1,1e-5*ones(1,nu)];
-            qN = q(1:nyN);
-            Q = diag(q);
-            QN = diag(qN);
-            
-            % upper and lower bounds for states (=nbx)
-            lb_x = 0*ones(nbx,1);
-            ub_x = 12*ones(nbx,1);
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = -80*ones(nbu,1);
-            ub_u = 80*ones(nbu,1);
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-            %Frequency for x(t) in rad/s 
-            data.f_rif_x=1.2;
-            %Same frequency used in MPC algorithm
-            data.f_x=data.f_rif_x*0.5/pi;
-            %Amplitude of x(t)
-            data.amplitude_x=1.2;
-            %Frequency for theta(t) in rad/s
-            data.f_rif_theta=1.2;
-            %Same frequency used in MPC algorithm
-            data.f_theta=data.f_rif_theta*0.5/pi;
-            %Amplitude of theta(t)
-            data.amplitude_theta=pi/18;
-            
-        
-        case 'TethUAV'
-            input.x0=[0; 0; 0; 0; 0; 0];%zeros(nx,1);
-            input.u0=[0; 0];%zeros(nu,1);%
-            para0=0;
-            
-            q = [10, 1, 10, 1, 0.01, 0.01];
-            qN = q(1:nyN);
-            Q = diag(q);
-            QN = diag(qN);
-            
-            b = 1;
-            omegaMax = 10*b;
-            fL_min = 0;
-            fL_max = 10;
-
-            % upper and lower bounds for states (=nbx)
-            lb_x = 0*ones(nbx,1);
-            ub_x = omegaMax*ones(nbx,1);
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = fL_min;
-            ub_g = fL_max;            
-            lb_gN = fL_min;
-            ub_gN = fL_max;
-            
-        case 'TethUAV_param'
-            input.x0=[0; 0; 0; 0; 0; 0];%zeros(nx,1);
-            input.u0=[0; 0];%zeros(nu,1);%
-            alpha = 20*pi/180;
-            para0=[-alpha; alpha];
-            
-            q = [10, 30, 10, 30, 0.01, 0.01, 80, 40, 10, 0];
-            qN = q(1:nyN);
-            Q = diag(q);
-            QN = diag(qN);
-            
-            b = 1;
-            omegaMax = 10*b;
-            fL_min = 0;
-            fL_max = 10;
-
-            % upper and lower bounds for states (=nbx)
-            lb_x = 0*ones(nbx,1);
-            ub_x = omegaMax*ones(nbx,1);
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = fL_min;
-            ub_g = fL_max;            
-            lb_gN = fL_min;
-            ub_gN = fL_max;
-
+           
     end
 
-    % prepare the data
+%% prepare the data
     
     input.lb=repmat([lb_g;lb_x],1,N);
     input.ub=repmat([ub_g;ub_x],1,N); 
@@ -530,10 +333,18 @@ function [input, data] = InitData(settings)
     input.mu=zeros(nc,N);
     input.muN=zeros(ncN,1);
     input.mu_u = zeros(N*nu,1);
+    
     %% Reference generation
-    main_folder= 'C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC';
+    
+    main_folder= 'C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC'; %change with MATMPC main folder
     switch settings.model
         case 'ActiveSeat_onlyP'
+            cd([main_folder,'\data\ActiveSeat_onlyP']);
+            data.REF = AS_REF_onlyP(25,Ts);
+            data.PAR = AS_PAR(25,Ts);
+            cd(main_folder);
+         
+        case 'ActiveSeat_onlyP_HP'
             cd([main_folder,'\data\ActiveSeat_onlyP']);
             data.REF = AS_REF_onlyP(25,Ts);
             data.PAR = AS_PAR(25,Ts);
@@ -556,41 +367,7 @@ function [input, data] = InitData(settings)
             data.REF = AS_REF(25,Ts);
             cd(main_folder);
                        
-        case 'DiM'
-
-            load REF_DiM_2;
-
-            REF_DiM_2 = [REF_DiM_2, zeros(5000,24)];
-
-            data.REF = REF_DiM_2;
-
-        case 'InvertedPendulum'
-
-            data.REF=zeros(1,nx+nu);
-
-        case 'ChainofMasses_Lin'
-
-            data.REF=[7.5,0,0,zeros(1,3*(n-1)),zeros(1,nu)];
-
-        case 'ChainofMasses_NLin'
-
-            data.REF=[1,0,0,zeros(1,3*(n-1)),zeros(1,nu)];
-
-        case 'Hexacopter'
-
-            data.REF = [1 1 1 0 0 0];
-
-        case 'TiltHex'
-            data.REF = [];
-            
-        case 'ActiveSeat'
-            data.REF = AS_REF(25,Ts);
-            
-        case 'TethUAV'
-            data.REF = [0 0 pi/6 0 0 0];
-            
-        case 'TethUAV_param'
-            data.REF = zeros(1,ny);
+ 
     end
     
 end

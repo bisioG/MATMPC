@@ -1,20 +1,8 @@
 
-%% usefull from here
+%% Load params
 
 run Pressure_model_params_nonLin
 
-% m = 67;
-% sigma_0 = 10^4;
-% vs = 0.005;
-% Fs = 45;
-% Fc = 30;
-% g = 9.81;
-% alpha = 10;
-% MM = 50;
-% k1 = 12000;
-% k2 = 1000;
-% c1 = 200;
-% c2 = 2000;
 
 %% Dimensions
 
@@ -60,7 +48,7 @@ dpressY=controls(1);
 
 x_dot=[prY2;...
        -(c1*(prY1)^2+c2)/m*prY2-(k1*(prY1)^2+k2)*prY1/m+accY+g*roll; ...            
-       2*k1*prY1^2*prY2+(k1*prY1^2+k2)*prY2+dpressY;...
+       [2*k1*prY1^2*prY2+(k1*prY1^2+k2)*prY2]/A+dpressY;...
        dpressY];
    
  

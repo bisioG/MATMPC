@@ -4,7 +4,7 @@ function [Yref] = AS_REF_onlyP(Tf,Ts)
 
 % %% Input signals assignment
     
-    load rif_pressione_calabogie.mat
+    load rif_pressione.mat
     Yref=[];
 
 

@@ -61,7 +61,9 @@ input_u = input.u0';
 
 while time(end) < Tf
     
-    if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')
+    if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_HP')
+        
         para0 = data.PAR(mem.iter,:)';
         para = repmat(para0,1,N+1);
         input.od=para;        
@@ -170,7 +172,8 @@ clear mex;
 
 %% numerical elaboration cases
 
- if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,'ActiveSeat_onlyP')
+ if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,'ActiveSeat_onlyP')||...
+         strcmp(settings.model,'ActiveSeat_onlyP_HP')
      run Num_elab
  end
  

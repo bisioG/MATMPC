@@ -45,7 +45,8 @@
 %    plot(tt,damping_nonLin,'y','Linewidth',1)
 %    plot(tt,F_att,'k--','Linewidth',1)
 %    plot(tt,F_att+F_el_nonLin+damping_nonLin,'m','Linewidth',1)
-%    lgd = legend('Reference Force (m*ay)','Output','Body Force (ma_y - damping- Friction-pressure)','Elastic Force','Damping','Friction','Sum: Elastic, Damping and Friction Forces')
+%    lgd = legend('Reference Force (m*ay)','Output','Body Force (ma_y -
+%    damping- Friction-pressure)','Elastic Force','Damping','Friction','Sum: Elastic, Damping and Friction Forces');
 %    lgd.FontSize= legend_size;
 %    xlabel('time [s]')
 %    ylabel('force [N]')
@@ -72,7 +73,8 @@
 %    plot(tt,elastic_effect,'m--','Linewidth',1)
 %    %plot(tt,F_el_nonLin,'k--','Linewidth',1)
 %    %plot(tt,damping_nonLin,'y','Linewidth',1)
-%    lgd = legend('Reference Force (m*ay)','Output','Damping effect (c(x)-c2)','Elastic effect (k(x)-k2)')
+%    lgd = legend('Reference Force (m*ay)','Output','Damping effect
+%    (c(x)-c2)','Elastic effect (k(x)-k2)');
 %    lgd.FontSize= legend_size;
 %    xlabel('time [s]')
 %    ylabel('force [N]')
@@ -99,7 +101,8 @@
 %    plot(tt,F_el_nonLin_WOfriction,'r--','Linewidth',1)
 %    plot(tt,damping_nonLin_WOfriction,'y','Linewidth',1)
 %    plot(tt,F_el_nonLin+damping_nonLin,'m','Linewidth',1)
-%    lgd = legend('Reference Force (m*ay)','Output','Body Force (ma_y - damping-pressure)','Elastic Force','Damping','Sum: Elastic, Damping and Friction Forces')
+%    lgd = legend('Reference Force (m*ay)','Output','Body Force (ma_y -
+%    damping-pressure)','Elastic Force','Damping','Sum: Elastic, Damping and Friction Forces');
 %    lgd.FontSize= legend_size;
 %    xlabel('time [s]')
 %    ylabel('force [N]')
@@ -122,7 +125,7 @@
 % plot(tt,vel_nonLin)
 % % xlim([0 5])
 % % ylim([0 0.3])
-% lgd = legend('body position NONLin','body velocity NONLin')
+% lgd = legend('body position NONLin','body velocity NONLin');
 % lgd.FontSize= legend_size;
 % xlabel('time [s]')
 % ylabel('[m]or [m/s]')
@@ -149,7 +152,8 @@
 %     plot(tt,F_pres_Lin,'r--','Linewidth',1)
 %     plot(tt,damping_Lin,'y','Linewidth',1)
 %     plot(tt,F_pres_Lin+damping_Lin,'m--','Linewidth',1)
-%     lgd = legend('Reference Force (m*ay)','Output','Body Force (ma_y - damping - elastic force)','Elastic Force','Damping','Sum Elastic, Damping')
+%     lgd = legend('Reference Force (m*ay)','Output','Body Force (ma_y -
+%     damping - elastic force)','Elastic Force','Damping','Sum Elastic, Damping');
 %     lgd.FontSize= legend_size;
 %     xlabel('time [s]')
 %     ylabel('force [N]')
@@ -172,7 +176,7 @@
 % plot(tt,vel_Lin)
 % % xlim([0 2])
 % % ylim([0 0.3])
-% lgd = legend('posizione corpo Lin','velocita` corpo Lin')
+% lgd = legend('posizione corpo Lin','velocita` corpo Lin');
 % lgd.FontSize= legend_size;
 % xlabel('time [s]')
 % ylabel('[m] or [m/s]')
@@ -197,7 +201,8 @@
 % %  xlim([0 3])
 %  xlim([0 3*1/fr])
 % %  ylim([0 0.3])
-% lgd = legend('posizione corpo Lin','posizione corpo nonLin', 'posizione corpo nonLin WOfriction' )
+% lgd = legend('posizione corpo Lin','posizione corpo nonLin', 'posizione
+% corpo nonLin WOfriction' );
 % lgd.FontSize= legend_size;
 % xlabel('time [s]')
 % ylabel('[m]')
