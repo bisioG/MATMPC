@@ -13,18 +13,18 @@ t = linspace(0.005,N_sim/200,N_sim);
 
 %% parametri ax,ay  SINUSOIDE *******************************************************
 
-% param_name = 'Sinusoidal';
-% Amp = 10;
-% fr = 1/25;
-% ay = Amp*sin(2*pi*fr*t);
-% ax = ay;
+param_name = 'Sinusoidal';
+Amp = 10;
+fr = 1/25;
+ay = Amp*sin(2*pi*fr*t);
+ax = ay;
 
 %% parametri ax,ay GRADINO ************************************************************
 
-param_name = 'Step';
-Amp = 10;
-ay = [zeros(1,100) Amp*ones(1,(length(t)-100))];
-ax = ay;
+% param_name = 'Step';
+% Amp = 10;
+% ay = [zeros(1,100) Amp*ones(1,(length(t)-100))];
+% ax = ay;
 
 %% parametri ax,ay CALABOGIE *********************************************************
 
@@ -128,9 +128,6 @@ cd ('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC\examples');
 run Pressure_model_params_Lin
 cd(current_path);
 
-k2= 6000;
-c2=500;
-
 tspan = linspace(0.005,N_sim/200,N_sim); % tspan = Ts:Ts:N_sim/200;
 y0 = [0;0;0]; % cond iniziali
 
@@ -197,11 +194,11 @@ if (strcmp(param_name,'Sinusoidal')==1) || (strcmp(param_name,'Step')==1)
 
     rif_roll = zeros(length(ax));
 
-    rif_accX = ax*0.5; %scale
-    rif_accY = ay*0.5;
+%     rif_accX = ax*0.5; %scale
+%     rif_accY = ay*0.5;
 
-%     rif_accX = ax; %not scale
-%     rif_accY = ay;
+    rif_accX = ax; %not scale
+    rif_accY = ay;
 
     save([pwd,'\rif_params_saved\rif_params'],'rif_accX','rif_accY','rif_roll');
 

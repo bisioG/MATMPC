@@ -62,7 +62,7 @@ input_u = input.u0';
 while time(end) < Tf
     
     if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||...
-            strcmp(settings.model,'ActiveSeat_onlyP_HP')
+            strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')
         
         para0 = data.PAR(mem.iter,:)';
         para = repmat(para0,1,N+1);
@@ -173,7 +173,7 @@ clear mex;
 %% numerical elaboration cases
 
  if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,'ActiveSeat_onlyP')||...
-         strcmp(settings.model,'ActiveSeat_onlyP_HP')
+         strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')
      run Num_elab
  end
  
@@ -186,7 +186,7 @@ disp(['Maximum CPT: ', num2str(max(CPT(2:end-1,:))) ]);
 
 Draw;
 
-%% save reference for ActiveSeat_onlyP
+%% save params for ActiveSeat_onlyP
 if strcmp(settings.model,'ActiveSeat')
     old_folder = pwd;
     save([pwd,'\data\ActiveSeat_onlyP\data_MPC_ActiveSeat_full'],'controls_MPC','state_sim');

@@ -18,7 +18,7 @@ function [input, data] = InitData(settings)
     
  %% **********************MODIFICA VELOCE PESI****************************
     if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||...
-            strcmp(settings.model,'ActiveSeat_onlyP_HP')
+            strcmp(settings.model,'ActiveSeat_onlyP_HP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')
         Wq_t(1) = 10;
         Wr3_t(1)= 0.1;
     end
@@ -248,9 +248,107 @@ function [input, data] = InitData(settings)
             input.lbu = repmat(lbu,1,N);
             input.ubu = repmat(ubu,1,N);
             
+       case 'ActiveSeat_onlyP_Lin_HP'
+            
+            input.x0 = [0, 0.0001, 0, 0, 0, 0]';
+            input.u0 = zeros(nu,1);
+            para0 = [0 0 0];         
+
+%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
+
+            Wq = diag(Wq_t); % diag matrix coi pesi
+
+%             Wr3_t(1)= 0.1;
+            Wr3 = diag(Wr3_t); % diag matrix coi pesi
+            
+            Q = blkdiag(Wq,Wr3);
+            QN = Wq(1:nyN,1:nyN)*0;
+            
+            
+            % upper and lower bounds for states (=nbx)
+            
+            lb_x = [];%-inf(nu,1);
+            ub_x = [];%-lb_x;
+
+            % upper and lower bounds for controls (=nbu)           
+            lb_u = [];
+            ub_u = [];
+                       
+            % upper and lower bounds for general constraints (=nc)
+            lb_g = [];
+            ub_g = [];            
+            lb_gN = [];
+            ub_gN = [];
+
+            % store the constraint data into input
+            
+            input.lb=repmat([lb_g;lb_x],1,N);
+            input.ub=repmat([ub_g;ub_x],1,N); 
+            nput.lbN=[lb_gN;lb_x];               
+            input.ubN=[ub_gN;ub_x]; 
+            
+            lbu = -inf(nu,1);
+            ubu = inf(nu,1);
+            for i=1:nbu
+                lbu(nbu_idx(i)) = lb_u(i);
+                ubu(nbu_idx(i)) = ub_u(i);
+            end
+            
+            input.lbu = repmat(lbu,1,N);
+            input.ubu = repmat(ubu,1,N);
+            
       case 'ActiveSeat_onlyP_WOfriction'
             
             input.x0 = [0, 0.0001, 0, 0]';
+            input.u0 = zeros(nu,1);
+            para0 = [0 0 0];         
+
+%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
+
+            Wq = diag(Wq_t); % diag matrix coi pesi
+
+%             Wr3_t(1)= 0.1;
+            Wr3 = diag(Wr3_t); % diag matrix coi pesi
+            
+            Q = blkdiag(Wq,Wr3);
+            QN = Wq(1:nyN,1:nyN)*0;
+            
+            
+            % upper and lower bounds for states (=nbx)
+            
+            lb_x = [];%-inf(nu,1);
+            ub_x = [];%-lb_x;
+
+            % upper and lower bounds for controls (=nbu)           
+            lb_u = [];
+            ub_u = [];
+                       
+            % upper and lower bounds for general constraints (=nc)
+            lb_g = [];
+            ub_g = [];            
+            lb_gN = [];
+            ub_gN = [];
+
+            % store the constraint data into input
+            
+            input.lb=repmat([lb_g;lb_x],1,N);
+            input.ub=repmat([ub_g;ub_x],1,N); 
+            nput.lbN=[lb_gN;lb_x];               
+            input.ubN=[ub_gN;ub_x]; 
+            
+            lbu = -inf(nu,1);
+            ubu = inf(nu,1);
+            for i=1:nbu
+                lbu(nbu_idx(i)) = lb_u(i);
+                ubu(nbu_idx(i)) = ub_u(i);
+            end
+            
+            input.lbu = repmat(lbu,1,N);
+            input.ubu = repmat(ubu,1,N);
+            
+       case 'ActiveSeat_onlyP_WOfriction_HP'
+            
+            input.x0 = [0, 0.0001, 0, 0, 0, 0]';
             input.u0 = zeros(nu,1);
             para0 = [0 0 0];         
 
@@ -356,7 +454,19 @@ function [input, data] = InitData(settings)
             data.PAR = AS_PAR(25,Ts);
             cd(main_folder);
             
+        case 'ActiveSeat_onlyP_Lin_HP'
+            cd([main_folder,'\data\ActiveSeat_onlyP']);
+            data.REF = AS_REF_onlyP(25,Ts);
+            data.PAR = AS_PAR(25,Ts);
+            cd(main_folder);
+            
         case 'ActiveSeat_onlyP_WOfriction'
+            cd([main_folder,'\data\ActiveSeat_onlyP']);
+            data.REF = AS_REF_onlyP(25,Ts);
+            data.PAR = AS_PAR(25,Ts);
+            cd(main_folder);
+            
+        case 'ActiveSeat_onlyP_WOfriction_HP'
             cd([main_folder,'\data\ActiveSeat_onlyP']);
             data.REF = AS_REF_onlyP(25,Ts);
             data.PAR = AS_PAR(25,Ts);

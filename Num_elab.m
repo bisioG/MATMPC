@@ -20,7 +20,7 @@
                 platform_p(i)=(k2*state_sim(i,1))/A + (c2*state_sim(i,2))/A;
             
             end
-        elseif  strcmp(settings.model,'ActiveSeat_onlyP_HP') 
+        elseif  strcmp(settings.model,'ActiveSeat_onlyP_HP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')
             
             run([pwd,'\examples/Pressure_model_params_nonLin']);
             for i = 1:length(state_sim(:,1))-1
