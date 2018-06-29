@@ -1,3 +1,8 @@
+% ONLY LATERAL PRESSURE MODEL NON LINEAR + HIGH PASS FILTER
+
+%%***** SETTING MAIN MATMPC PATH
+
+path_main_matmpc = 'C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC';
 
 %% Load params
 run Pressure_model_params_nonLin
@@ -97,6 +102,6 @@ Ts_st = 0.005; % shooting interval time
 
 %% save your data in the path of your MATMPC
 
-cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC'); %main matmpc folder
+cd(path_main_matmpc); %main matmpc folder
 
 clc;

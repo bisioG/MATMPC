@@ -1,16 +1,17 @@
-% ONLY LATERAL PRESSURE MODEL LINEAR + HIGH PASS FILTER
+%%***** LONGITUDINAL LINEAR PRESSURE MODEL
+
 
 %%***** SETTING MAIN MATMPC PATH
 
 path_main_matmpc = 'C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC';
 
-%% usefull from here
+%% model params
 
 run Pressure_model_params_Lin
 
 %% Dimensions
 
-nx=6;       % No. of states
+nx=4;       % No. of states
 nu=1;       % No. of controls
 ny=2;       % No. of outputs
 nyN=1;      % No. of outputs at the terminal point
@@ -35,25 +36,21 @@ QN       = SX.sym('QN',nyN,nyN);
 %% Dynamics
 
 accX=params(1); 
-roll=params(2); 
+pitch=params(2); 
 accY=params(3);
 
 prY1=states(1); 
 prY2=states(2); 
 y_press=states(3); 
-pressY=states(4);
-x_hp = states(5);
-y_press_hp = states(6);
+pressY=states(4); 
 
 dpressY=controls(1);
 
 
 x_dot=[prY2;...
-       -c2/m*prY2-k2*prY1/m+accY+g*roll; ...               
+       -c2/m*prY2-k2*prY1/m+accX+g*pitch; ...               
        [k2*prY2]/A+dpressY;...
-       dpressY;...
-       (-1/tau_hp)*x_hp+y_press/A;...
-       (-1/tau_hp)*x_hp+y_press/A+pressY];
+       dpressY];
    
  
 xdot = SX.sym('xdot',nx,1);
@@ -62,7 +59,7 @@ impl_f = xdot - x_dot;
 %% Objectives and constraints
 
 % objectives
-h = [y_press_hp; pressY ];
+h = [y_press; pressY ];
 
 hN=[pressY]; %generic state 
 
@@ -95,7 +92,7 @@ path_con_N_fun=Function('path_con_N_fun', {states,params}, {path_con_N},{'states
 Ts = 0.005; % simulation sample time
 Ts_st = 0.005; % shooting interval time
 
-%% save your data in the path of your MATMPC
+%% MATMPC path
 
 cd(path_main_matmpc); %main matmpc folder
 

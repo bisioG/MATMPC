@@ -1,4 +1,4 @@
-function [Par] = AS_PAR()
+function [Par] = AS_PAR_LAT()
 
 % %% Input signals assignment
     
@@ -7,7 +7,7 @@ function [Par] = AS_PAR()
     Par=[];
     
 for i=1:N
-             Par = [Par; rif_accX(i) rif_roll(i) rif_accY(i)];
+             Par = [Par; rif_accX(i) rif_pitch(i) rif_accY(i)]; %change roll with pitch in the lateral model
                
             
 end

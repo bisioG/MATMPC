@@ -62,7 +62,8 @@ input_u = input.u0';
 while time(end) < Tf
     
     if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||...
-            strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')
+            strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Lat')
         
         para0 = data.PAR(mem.iter,:)';
         para = repmat(para0,1,N+1);
@@ -146,7 +147,7 @@ while time(end) < Tf
         input_u = [input_u; xf(5)];
     end
     
-    if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction') % xf(4) = pressY
+    if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Lat') % xf(4) = pressY
         input_u = [input_u; xf(4)];
     end
       
@@ -173,7 +174,9 @@ clear mex;
 %% numerical elaboration cases
 
  if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,'ActiveSeat_onlyP')||...
-         strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')
+         strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
+         strcmp(settings.model,'ActiveSeat_onlyP_Lin')
+     
      run Num_elab
  end
  

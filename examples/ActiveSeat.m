@@ -1,7 +1,13 @@
-%% find your path to the original active seat model files
+%% VESTIBULAR MODEL+ACTIVE SEAT NON LINEAR MODEL
+
+%%**** SET NONLINEAR FOLDER (CUNICO)
 
 addpath(genpath('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\nonlinear'));
 cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\nonlinear');
+
+%%**** SET MAIN PATH OF MATMPC
+
+path_main_matmpc = 'C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC';
 
 %% read data
 
@@ -97,19 +103,6 @@ A=[A,zeros(30,2)];
 %% pressure model params
 run Pressure_model_params_nonLin
 
-% m = 67;
-% sigma_0 = 10^4;
-% vs = 0.005;
-% Fs = 45;
-% Fc = 30;
-% g = 9.81;
-% alpha = 10;
-% MM = 50;
-% k1 = 12000;
-% k2 = 1000;
-% c1 = 200;
-% c2 = 2000;
-
 %% Dimensions
 
 nx=32;  % No. of states
@@ -185,7 +178,7 @@ x_dot=[A(1:27,:)*states+B(1:27,:)*controls;...
        prY2;...
        -(c1*(prY1)^2+c2)/m*prY2-(k1*(prY1)^2+k2)*prY1/m+accY+g*roll-sigma_0*prY3/m; ...
        prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
-       2*k1*prY1^2*prY2+(k1*prY1^2)*prY2+dpressY;...
+       [2*k1*prY1^2*prY2+(k1*prY1^2)*prY2]/A+dpressY;...
        dpressY];              
        
  
@@ -240,8 +233,8 @@ data_AS.y_lim_yx_pl = y_lim_yx_pl;
 data_AS.y_lim_zv_pv = y_lim_zv_pv;
 data_AS.y_lim_za_pa = y_lim_za_pa;
 
-save('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC/data/ActiveSeat/data_AS.mat','data_AS');
+save([path_main_matmpc,'/data/ActiveSeat/data_AS.mat'],'data_AS');
 
-cd('C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC');
+cd(path_main_matmpc);
 
 clc;

@@ -7,7 +7,7 @@ disp('---------------------------------------------');
 addpath([pwd,'/examples']);
 
 
-settings.model='ActiveSeat_onlyP_WOfriction_HP'; % see the folder "examples" for details 
+settings.model='ActiveSeat_onlyP_HP'; % see the folder "examples" for details 
 
 % Models not filtered:
 % ActiveSeat

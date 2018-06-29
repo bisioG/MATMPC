@@ -1,7 +1,0 @@
-
-Main_Test script:
-
-Create a sinusoidal signal for accX,accY.
-The roll signal is put to zero.
-
-To change the sinusoidal params go to line (9) (10)
