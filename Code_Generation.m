@@ -14,6 +14,7 @@ settings.model='ActiveSeat_onlyP_HP'; % see the folder "examples" for details
 % ActiveSeat_onlyP
 % ActiveSeat_onlyP_Lin
 % ActiveSeat_onlyP_WOfriction
+% ActiveSeat_onlyP_Lin_Long
 
 % Models filtered:
 % ActiveSeat_onlyP_HP

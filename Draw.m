@@ -137,7 +137,7 @@ switch settings.model
     case 'ActiveSeat_onlyP_HP'
         % load the data you saved
         
-        load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
+        load([pwd,'\data\ActiveSeat_onlyP/rif_pressione']);
         figure;        
         plot(time(1:end-1),rif_pressione(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
         hold on; grid on;

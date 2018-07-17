@@ -12,7 +12,7 @@
                 platform_p(i)=((k(i)-k2)*state_sim(i,1))/A + ((c(i)-c2)*state_sim(i,2))/A;
             
             end
-        elseif strcmp(settings.model,'ActiveSeat_onlyP_Lin')
+        elseif strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')
             
             run([pwd,'\examples\Pressure_model_params_Lin']);
         
@@ -20,7 +20,7 @@
                 platform_p(i)=(k2*state_sim(i,1))/A + (c2*state_sim(i,2))/A;
             
             end
-        elseif  strcmp(settings.model,'ActiveSeat_onlyP_HP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')
+        elseif  strcmp(settings.model,'ActiveSeat_onlyP_HP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')
             
             run([pwd,'\examples/Pressure_model_params_nonLin']);
             for i = 1:length(state_sim(:,1))-1
@@ -29,7 +29,14 @@
                 platform_p(i)=(-1/tau_hp)*(state_sim(i,6))+[((k(i)-k2)*state_sim(i,1))/A + ((c(i)-c2)*state_sim(i,2))/A];
             
             end
+        elseif strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')
             
+            run([pwd,'\examples\Pressure_model_params_Lin']);
+            
+            for i = 1:length(state_sim(:,1))-1
+                platform_p(i)=(-1/tau_hp)*(state_sim(i,5))+[(k2*state_sim(i,1))/A + (c2*state_sim(i,2))/A];
+            
+            end
         end
         
           u_true= y_sim(:,1)'-platform_p; %ingresso vero AS

@@ -1,16 +1,16 @@
-% ONLY LATERAL PRESSURE MODEL NON LINEAR
+% ONLY LATERAL PRESSURE MODEL LINEAR + HIGH PASS FILTER
 
 %%***** SETTING MAIN MATMPC PATH
 
 path_main_matmpc = 'C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC';
 
+%% usefull from here
 
-%% Load model params
-run Pressure_model_params_nonLin
+run Pressure_model_params_Lin
 
 %% Dimensions
 
-nx=5;       % No. of states
+nx=6;       % No. of states
 nu=1;       % No. of controls
 ny=2;       % No. of outputs
 nyN=1;      % No. of outputs at the terminal point
@@ -35,27 +35,25 @@ QN       = SX.sym('QN',nyN,nyN);
 %% Dynamics
 
 accX=params(1); 
-roll=params(2); 
+pitch=params(2); 
 accY=params(3);
 
 prY1=states(1); 
 prY2=states(2); 
-prY3=states(3); 
-y_press=states(4); 
-pressY=states(5); 
+y_press=states(3); 
+pressY=states(4);
+x_hp = states(5);
+y_press_hp = states(6);
 
 dpressY=controls(1);
 
 
-tmp1= (sqrt(prY2^2)*prY3) ;
-tmp2= m*accX*cos(pi/180*alpha)+MM*g*sin(pi/180*alpha) ; %Fn = normale al poggia schiena
-tmp3= 1/(pi)*atan(tmp2)+0.6 ;   %fuzione per annullare o meno attrito in presenza di contatto o meno con il sedile
-
 x_dot=[prY2;...
-       -(c1*(prY1)^2+c2)/m*prY2-(k1*(prY1)^2+k2)*prY1/m+accY+MM*g*roll/m-sigma_0*prY3/m; ...
-       prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
-       [(2*k1*prY1^2)*prY2+(k1*prY1^2)*prY2]/A+dpressY;... 
-       dpressY];
+       -c2/m*prY2-k2*prY1/m+accX+g*pitch; ...               
+       [k2*prY2]/A+dpressY;...
+       dpressY;...
+       (-1/tau_hp)*x_hp+y_press/A;...
+       (-1/tau_hp)*x_hp+y_press/A+pressY];
    
  
 xdot = SX.sym('xdot',nx,1);
@@ -64,7 +62,7 @@ impl_f = xdot - x_dot;
 %% Objectives and constraints
 
 % objectives
-h = [y_press; pressY ];
+h = [y_press_hp; pressY ];
 
 hN=[pressY]; %generic state 
 
