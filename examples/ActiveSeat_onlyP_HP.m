@@ -1,4 +1,6 @@
-% ONLY LATERAL PRESSURE MODEL NON LINEAR + HIGH PASS FILTER
+% ONLY LATERAL PRESSURE MODEL NON LINEAR + HIGH PASS FILTER ( 5 STATI)
+% ricordarsi di modificare anche InitData inizializzando opportunamente il
+% vettore
 
 %%***** SETTING MAIN MATMPC PATH
 
@@ -9,7 +11,7 @@ run Pressure_model_params_nonLin
 
 %% Dimensions
 
-nx=7;       % No. of states
+nx=5;       % No. of states
 nu=1;       % No. of controls
 ny=2;       % No. of outputs
 nyN=1;      % No. of outputs at the terminal point
@@ -40,27 +42,30 @@ accY=params(3);
 prY1=states(1); 
 prY2=states(2); 
 prY3=states(3); 
-y_press=states(4); 
-pressY=states(5);
-x_hp = states(6);
-y_press_hp = states(7);
+pressY=states(4);
+x_hp = states(5);
 
 dpressY=controls(1);
 
+   
+%% versione 5 stati [no y_press_hp no y_press], espressione uscita su funzione di costo
 
 tmp1= (sqrt(prY2^2)*prY3) ; %modulo( prY2 )* prY3
 tmp2= m*accX*cos(pi/180*alpha)+MM*g*sin(pi/180*alpha) ; %Fn = normale al poggia schiena
 tmp3= 1/(pi)*atan(tmp2)+0.6 ;   %fuzione per annullare o meno attrito in presenza di contatto o meno con il sedile
 
-tmp4 = [(2*k1*prY1^2)*prY2+(k1*prY1^2)*prY2]/A; % derivata dell pressione del corpo indotta dalla piattaforma (no smorzamento)
+tmp4 = -(c1*(prY1)^2+c2)/m*prY2-(k1*(prY1)^2+k2)*prY1/m+accY+MM*g*roll/m-sigma_0*prY3/m; %body dynamic eq
 
 x_dot=[prY2;...
-       -(c1*(prY1)^2+c2)/m*prY2-(k1*(prY1)^2+k2)*prY1/m+accY+MM*g*roll/m-sigma_0*prY3/m; ...
+       tmp4; ...
        prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
-       tmp4+dpressY;... 
-       dpressY;...
-       (-1/tau_hp)*x_hp+y_press;...
-       (-1/tau_hp)*[(-1/tau_hp)*x_hp+y_press]+[tmp4+dpressY]];
+       dpressY;... %per non avere il controllo in uscita
+       (-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+ pressY];
+   
+%%
+
+xdot = SX.sym('xdot',nx,1);
+impl_f = xdot - x_dot;
    
  
 xdot = SX.sym('xdot',nx,1);
@@ -69,7 +74,8 @@ impl_f = xdot - x_dot;
 %% Objectives and constraints
 
 % objectives
-h = [y_press_hp; pressY ];
+
+h = [(-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+ pressY; pressY];
 
 hN=[pressY]; %generic state 
 

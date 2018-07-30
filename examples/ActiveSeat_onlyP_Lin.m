@@ -10,7 +10,7 @@ run Pressure_model_params_Lin
 
 %% Dimensions
 
-nx=4;       % No. of states
+nx=3;       % No. of states
 nu=1;       % No. of controls
 ny=2;       % No. of outputs
 nyN=1;      % No. of outputs at the terminal point
@@ -40,8 +40,7 @@ accY=params(3);
 
 prY1=states(1); 
 prY2=states(2); 
-y_press=states(3); 
-pressY=states(4); 
+pressY=states(3); 
 
 dpressY=controls(1);
 
@@ -50,7 +49,6 @@ dpressY=controls(1);
 
 x_dot=[prY2;...
        -c2/m*prY2-k2*prY1/m+accY+MM*g*roll/m; ...               
-       [k2*prY2]/A+dpressY;...
        dpressY];
    
  
@@ -60,7 +58,7 @@ impl_f = xdot - x_dot;
 %% Objectives and constraints
 
 % objectives
-h = [y_press; pressY ];
+h = [c2/A*prY2+k2*prY1/A+pressY ; pressY ];
 
 hN=[pressY]; %generic state 
 

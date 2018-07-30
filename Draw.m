@@ -13,9 +13,8 @@ legend_size=12; %LEGEND SIZE SETTINGS
 title_size=19;  %TITLE SIZE SETTINGS
 
 %% start generating pictures
-switch settings.model
     
-    case 'ActiveSeat'
+    if strcmp(settings.model,'ActiveSeat')
         % load the data you saved
         load([pwd,'\data\ActiveSeat/AS_REF_DATA']);
         
@@ -118,96 +117,69 @@ switch settings.model
         lgd = legend('Reference lateral trunk pressure','Active seat trunk pressure','Pressure induced by platform motion')
         lgd.FontSize= legend_size;
         xlabel('time [s]'); ylabel('[Pa]');
-        
-    case 'ActiveSeat_onlyP'
+    
+    elseif  strcmp(settings.model,'ActiveSeat_onlyP_HP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')
+       
         % load the data you saved
        
         load([pwd,'\data\ActiveSeat_onlyP/rif_pressione']);
+        
+        % figure MATMPC
+        
+        figure;        
+        plot(time(1:end-1),rif_pressione_hp(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
+        hold on; grid on;
+%         plot(time(1:end-1),rif_pressione(1:Tf/0.005),'k','Linewidth',1);
+        plot(time(1:end-1),y_sim(:,1),'r--','Linewidth',1);
+%         plot(time(1:end-1),input_u,'m','Linewidth',1);
+%         plot(time(1:end-1),platform_p_hp,'k--','Linewidth',1);
+        lgd = legend('Reference lateral trunk pressure hp','Pressure induced by platform motion+active seat');
+        lgd.FontSize= legend_size;
+        xlabel('time [s]'); ylabel('[Pa]');
+        title(['MATMPC, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size)
+        
+        % figure compare input AS
+        
+        figure;        
+%         plot(time(1:end-1),rif_pressione_hp(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
+        hold on; grid on;
+        plot(time(1:end-1),u_diff,'r--','Linewidth',1);
+        plot(time(1:end-1),input_u(1:end-1),'g--','Linewidth',1);
+%         plot(time(1:end-1),platform_p_hp,'k--','Linewidth',1);
+        lgd = legend('Active seat input (by difference, NO hp)','Active seat input (MPC,hp)');
+        lgd.FontSize= legend_size;
+        xlabel('time [s]'); ylabel('[Pa]');
+        title(['Compare AS input, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size)
+        
+        %compare reference
+        
+        figure;        
+        plot(time(1:end-1),rif_pressione_hp(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
+        hold on; grid on;
+        plot(time(1:end-1),rif_pressione(1:Tf/0.005),'r','Linewidth',1);
+        lgd = legend('Reference HP','Reference');
+        lgd.FontSize= legend_size;
+        xlabel('time [s]'); ylabel('[Pa]');
+        title(['Compare reference, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size)
+        
+   elseif strcmp(settings.model,'ActiveSeat_onlyP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')
+        
+        % figure MATMPC
+        
         figure;        
         plot(time(1:end-1),rif_pressione(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
         hold on; grid on;
-        plot(time(1:end-1),y_sim(:,1),'r','Linewidth',1);
-        plot(time(1:end-1),u_true,'m','Linewidth',1);
-        plot(time(1:end-1),platform_p,'k--','Linewidth',1);
-        lgd = legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure (by difference)','Pressure induced by platform motion');
+        plot(time(1:end-1),y_sim(:,1),'r--','Linewidth',1);
+        lgd = legend('Reference lateral trunk pressure hp','Pressure induced by platform motion+active seat');
         lgd.FontSize= legend_size;
         xlabel('time [s]'); ylabel('[Pa]');
-        title('Model: ActiveSeat OnlyP','FontSize',title_size)
+        title(['MATMPC, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size)
         
-    case 'ActiveSeat_onlyP_HP'
-        % load the data you saved
         
-        load([pwd,'\data\ActiveSeat_onlyP/rif_pressione']);
-        figure;        
-        plot(time(1:end-1),rif_pressione(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
-        hold on; grid on;
-        plot(time(1:end-1),y_sim(:,1),'r','Linewidth',1);
-        plot(time(1:end-1),u_true,'g--','Linewidth',1);
-        plot(time(1:end-1),platform_p,'k--','Linewidth',1);
-        lgd = legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure (by difference)','Pressure induced by platform motion');
-        lgd.FontSize= legend_size;
-        xlabel('time [s]'); ylabel('[Pa]');
-        title(['Model: ActiveSeat OnlyP HP  Test: ',label],'FontSize',title_size,'Interpreter', 'none')
-               
-    case 'ActiveSeat_onlyP_Lin'
-        % load the data you saved
-        
-        load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
-        figure;        
-        plot(time(1:end-1),rif_pressione(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
-        hold on; grid on;
-        plot(time(1:end-1),y_sim(:,1),'r','Linewidth',1);
-        plot(time(1:end-1),u_true,'m','Linewidth',1);
-        plot(time(1:end-1),platform_p,'k--','Linewidth',1);
-        lgd = legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure (by difference)','Pressure induced by platform motion')
-        lgd.FontSize= legend_size;
-        xlabel('time [s]'); ylabel('[Pa]');
-        title('Model: ActiveSeat OnlyP Linear','FontSize',title_size)
-        
-     case 'ActiveSeat_onlyP_Lin_HP'
-        % load the data you saved
-        
-        load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
-        figure;        
-        plot(time(1:end-1),rif_pressione(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
-        hold on; grid on;
-        plot(time(1:end-1),y_sim(:,1),'r','Linewidth',1);
-        plot(time(1:end-1),u_true,'m','Linewidth',1);
-        plot(time(1:end-1),platform_p,'k--','Linewidth',1);
-        lgd = legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure (by difference)','Pressure induced by platform motion')
-        lgd.FontSize= legend_size;
-        xlabel('time [s]'); ylabel('[Pa]');
-        title('Model: ActiveSeat OnlyP Linear','FontSize',title_size)
-        
-     case 'ActiveSeat_onlyP_WOfriction'
-        % load the data you saved
-        
-        load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
-        figure;        
-        plot(time(1:end-1),rif_pressione(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
-        hold on; grid on;
-        plot(time(1:end-1),y_sim(:,1),'r','Linewidth',1);
-        plot(time(1:end-1),u_true,'m','Linewidth',1);
-        plot(time(1:end-1),platform_p,'k--','Linewidth',1);
-        lgd = legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure (by difference)','Pressure induced by platform motion')
-        lgd.FontSize= legend_size;
-        xlabel('time [s]'); ylabel('[Pa]');
-        title('Model: ActiveSeat OnlyP WOfriction','FontSize',title_size)
-        
-     case 'ActiveSeat_onlyP_WOfriction_HP'
-        % load the data you saved
-        
-        load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
-        figure;        
-        plot(time(1:end-1),rif_pressione(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
-        hold on; grid on;
-        plot(time(1:end-1),y_sim(:,1),'r','Linewidth',1);
-        plot(time(1:end-1),u_true,'m','Linewidth',1);
-        plot(time(1:end-1),platform_p,'k--','Linewidth',1);
-        lgd = legend('Reference lateral trunk pressure','Pressure induced by platform motion+active seat','Active seat trunk pressure (by difference)','Pressure induced by platform motion')
-        lgd.FontSize= legend_size;
-        xlabel('time [s]'); ylabel('[Pa]');
-        title('Model: ActiveSeat OnlyP WOfriction','FontSize',title_size)
-        
-    
-end
+  end

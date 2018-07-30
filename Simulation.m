@@ -143,13 +143,14 @@ while time(end) < Tf
         input_u = [input_u; output.u(1:6,1)',xf(32)];
     end
        
-    if strcmp(settings.model,'ActiveSeat_onlyP') % xf(5) = pressY
-        input_u = [input_u; xf(5)];
+    if strcmp(settings.model,'ActiveSeat_onlyP')|| strcmp(settings.model,'ActiveSeat_onlyP_HP') % xf(4) = pressY
+        input_u = [input_u; xf(4)];
     end
     
-    if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||...
+    if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
             strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')% xf(4) = pressY
-        input_u = [input_u; xf(4)];
+        input_u = [input_u; xf(3)];
     end
       
     % store the optimal solution and states
@@ -174,9 +175,9 @@ clear mex;
 
 %% numerical elaboration cases
 
- if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,'ActiveSeat_onlyP')||...
+ if strcmp(settings.model,'ActiveSeat_onlyP')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin')||...
          strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
-         strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')
+         strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')
      
      run Num_elab
  end
@@ -190,7 +191,8 @@ disp(['Maximum CPT: ', num2str(max(CPT(2:end-1,:))) ]);
 
 Draw;
 
-%% save params for ActiveSeat_onlyP
+%% save params (to obtain online params for OnlyP models)
+
 if strcmp(settings.model,'ActiveSeat')
     old_folder = pwd;
     save([pwd,'\data\ActiveSeat_onlyP\data_MPC_ActiveSeat_full'],'controls_MPC','state_sim');
@@ -202,7 +204,7 @@ end
 
 %% errors
 
-%RMSE
-load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
-RMSE = sqrt(immse(rif_pressione(1:5000), y_sim(:,1)'));
-disp(['RMSE: ', num2str(RMSE), '[Pa]' ]);
+% %RMSE
+% load([pwd,'\data\ActiveSeat_onlyP/AS_REF_DATA_onlyP']);
+% RMSE = sqrt(immse(rif_pressione(1:5000), y_sim(:,1)'));
+% disp(['RMSE: ', num2str(RMSE), '[Pa]' ]);

@@ -10,7 +10,7 @@ run Pressure_model_params_Lin
 
 %% Dimensions
 
-nx=6;       % No. of states
+nx=4;       % No. of states
 nu=1;       % No. of controls
 ny=2;       % No. of outputs
 nyN=1;      % No. of outputs at the terminal point
@@ -39,21 +39,17 @@ pitch=params(2);
 accY=params(3);
 
 prY1=states(1); 
-prY2=states(2); 
-y_press=states(3); 
-pressY=states(4);
-x_hp = states(5);
-y_press_hp = states(6);
+prY2=states(2);  
+pressY=states(3);
+x_hp = states(4);
 
 dpressY=controls(1);
 
 
 x_dot=[prY2;...
        -c2/m*prY2-k2*prY1/m+accX+MM*g*pitch/m; ...               
-       [k2*prY2]/A+dpressY;...
        dpressY;...
-       (-1/tau_hp)*x_hp+y_press;...
-       (-1/tau_hp)*[(-1/tau_hp)*x_hp+y_press]+[[k2*prY2]/A+dpressY]];
+       (-1/tau_hp)*x_hp+[c2/A*prY2+k2*prY1/A]+pressY];
    
  
 xdot = SX.sym('xdot',nx,1);
@@ -62,7 +58,7 @@ impl_f = xdot - x_dot;
 %% Objectives and constraints
 
 % objectives
-h = [y_press_hp; pressY ];
+h = [(-1/tau_hp)*x_hp+[c2/A*prY2+k2*prY1/A]+pressY; pressY ];
 
 hN=[pressY]; %generic state 
 
