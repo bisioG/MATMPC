@@ -1,4 +1,4 @@
-function [Par] = AS_PAR_LAT()
+function [Par] = AS_PAR_LONG()
 
 % %% Input signals assignment
     

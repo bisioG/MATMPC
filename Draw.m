@@ -121,7 +121,9 @@ title_size=19;  %TITLE SIZE SETTINGS
     elseif  strcmp(settings.model,'ActiveSeat_onlyP_HP')||...
             strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
             strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||...
-            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')
        
         % load the data you saved
        
@@ -132,38 +134,33 @@ title_size=19;  %TITLE SIZE SETTINGS
         figure;        
         plot(time(1:end-1),rif_pressione_hp(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
         hold on; grid on;
-%         plot(time(1:end-1),rif_pressione(1:Tf/0.005),'k','Linewidth',1);
         plot(time(1:end-1),y_sim(:,1),'r--','Linewidth',1);
-%         plot(time(1:end-1),input_u,'m','Linewidth',1);
-%         plot(time(1:end-1),platform_p_hp,'k--','Linewidth',1);
         lgd = legend('Reference lateral trunk pressure hp','Pressure induced by platform motion+active seat');
         lgd.FontSize= legend_size;
         xlabel('time [s]'); ylabel('[Pa]');
-        title(['MATMPC, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size)
+        title(['MATMPC, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size,'Interpreter', 'none')
         
         % figure compare input AS
         
         figure;        
-%         plot(time(1:end-1),rif_pressione_hp(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
         hold on; grid on;
-        plot(time(1:end-1),u_diff,'r--','Linewidth',1);
-        plot(time(1:end-1),input_u(1:end-1),'g--','Linewidth',1);
-%         plot(time(1:end-1),platform_p_hp,'k--','Linewidth',1);
+        plot(time(1:end-1),u_diff,'r--','Linewidth',1); %control by difference 
+        plot(time(1:end-1),input_u(1:end-1),'g--','Linewidth',1); %control with mpc
         lgd = legend('Active seat input (by difference, NO hp)','Active seat input (MPC,hp)');
         lgd.FontSize= legend_size;
         xlabel('time [s]'); ylabel('[Pa]');
-        title(['Compare AS input, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size)
+        title(['Compare AS input, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size,'Interpreter', 'none')
         
         %compare reference
         
         figure;        
-        plot(time(1:end-1),rif_pressione_hp(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
+        plot(time(1:end-1),rif_pressione_hp(1:Tf/0.005),'b','Linewidth',1);
         hold on; grid on;
         plot(time(1:end-1),rif_pressione(1:Tf/0.005),'r','Linewidth',1);
         lgd = legend('Reference HP','Reference');
         lgd.FontSize= legend_size;
         xlabel('time [s]'); ylabel('[Pa]');
-        title(['Compare reference, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size)
+        title(['Compare reference, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size,'Interpreter', 'none')
         
    elseif strcmp(settings.model,'ActiveSeat_onlyP')||...
             strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||...
@@ -173,13 +170,14 @@ title_size=19;  %TITLE SIZE SETTINGS
         % figure MATMPC
         
         figure;        
-        plot(time(1:end-1),rif_pressione(1:Tf/0.005),'b','Linewidth',1);   % 0.016 è l'area del cuscinetto
+        plot(time(1:end-1),rif_pressione(1:Tf/0.005),'b','Linewidth',1);  
         hold on; grid on;
         plot(time(1:end-1),y_sim(:,1),'r--','Linewidth',1);
         lgd = legend('Reference lateral trunk pressure hp','Pressure induced by platform motion+active seat');
         lgd.FontSize= legend_size;
         xlabel('time [s]'); ylabel('[Pa]');
-        title(['MATMPC, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size)
+        title(['MATMPC, Model: ',rif_type,', Simulation: ',sim_type],'FontSize',title_size,'Interpreter', 'none')
         
+    end
         
-  end
+    

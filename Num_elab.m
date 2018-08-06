@@ -1,18 +1,16 @@
-%% numerical elaboration for derivative problem (y_press) implementation in matmpc
-% utilizzo gli stati simulati per ottenere le grandezze di pressione
-% indotta dalla piattaforma, ingresso dell'active seat
+%% numerical elaboration
+% -utilizzo gli stati simulati per ottenere le grandezze di pressione
+% indotta dalla piattaforma, ingresso dell'active seat per calcolarmi il
+% segnale di controllo per differenza per confrontarlo
 
-
-% for i = 1:length(input_u)-1
-%     platform_p(i) = state_sim(i,4)-u_true(i);
-% end
 
 
 %% CALCOLO CONTROLLO PER DIFFERENZA
 load([pwd,'\data\ActiveSeat_onlyP/rif_pressione']);
 
 if strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,'ActiveSeat_onlyP')||...
-   strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_HP')
+   strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_HP')||...
+   strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')
                 
     run([pwd,'\examples/Pressure_model_params_nonLin']);
             
@@ -24,7 +22,8 @@ if strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,
     end
 
 elseif strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')||...
-        strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')
+        strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')||...
+        strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')
             
     run([pwd,'\examples\Pressure_model_params_Lin']);
         
@@ -37,7 +36,6 @@ end
                
 
 u_diff= rif_pressione-platform_p; %ingresso AS per differenza
-          
-
+      
         
         

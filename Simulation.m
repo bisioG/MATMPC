@@ -63,7 +63,8 @@ while time(end) < Tf
     
     if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||...
             strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
-            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')
         
         para0 = data.PAR(mem.iter,:)';
         para = repmat(para0,1,N+1);
@@ -143,19 +144,23 @@ while time(end) < Tf
         input_u = [input_u; output.u(1:6,1)',xf(32)];
     end
        
-    if strcmp(settings.model,'ActiveSeat_onlyP')|| strcmp(settings.model,'ActiveSeat_onlyP_HP') % xf(4) = pressY
+    if strcmp(settings.model,'ActiveSeat_onlyP')|| strcmp(settings.model,'ActiveSeat_onlyP_HP')||... % xf(4) = pressY
+        strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')
+    
         input_u = [input_u; xf(4)];
     end
     
     if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||...
             strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
-            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')% xf(4) = pressY
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')% xf(3) = pressY
         input_u = [input_u; xf(3)];
     end
       
     % store the optimal solution and states
     controls_MPC = [controls_MPC; output.u(:,1)'];
     state_sim = [state_sim; xf'];
+   
     
     % go to the next sampling instant
     nextTime = mem.iter*Ts; 
@@ -173,23 +178,6 @@ if strcmp(opt.qpsolver, 'qpoases')
 end
 clear mex;
 
-%% numerical elaboration cases
-
- if strcmp(settings.model,'ActiveSeat_onlyP')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin')||...
-         strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
-         strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')
-     
-     run Num_elab
- end
- 
-
-%% draw pictures (optional)
-display('                           ');
-disp(['Model:', settings.model ]);
-disp(['Average CPT: ', num2str(mean(CPT(2:end-1,:),1)) ]);
-disp(['Maximum CPT: ', num2str(max(CPT(2:end-1,:))) ]);
-
-Draw;
 
 %% save params (to obtain online params for OnlyP models)
 
@@ -200,6 +188,28 @@ if strcmp(settings.model,'ActiveSeat')
     make_onlyP_inputs();
     cd(old_folder);
 end
+
+%% numerical post elaboration 
+
+ if strcmp(settings.model,'ActiveSeat_onlyP')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin')||...
+         strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
+         strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')||...
+         strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')
+     
+     run Num_elab
+ end
+ 
+
+%% draw pictures (optional)
+
+display('                           ');
+disp(['Model:', settings.model ]);
+disp(['Average CPT: ', num2str(mean(CPT(2:end-1,:),1)) ]);
+disp(['Maximum CPT: ', num2str(max(CPT(2:end-1,:))) ]);
+
+Draw;
+save_data;
+
 
 
 %% errors

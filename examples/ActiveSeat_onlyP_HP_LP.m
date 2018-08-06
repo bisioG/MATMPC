@@ -1,4 +1,4 @@
-% ONLY LATERAL PRESSURE MODEL NON LINEAR + HIGH PASS FILTER (precived pressure) ( 5 STATI)
+% ONLY LATERAL PRESSURE MODEL NON LINEAR + HIGH PASS FILTER (percived pressure)+LOW PASS FILTER (valves dynamics) ( 6 STATI)
 % ricordarsi di modificare anche InitData inizializzando opportunamente il
 % vettore
 
@@ -11,7 +11,7 @@ run Pressure_model_params_nonLin
 
 %% Dimensions
 
-nx=5;       % No. of states
+nx=6;       % No. of states
 nu=1;       % No. of controls
 ny=2;       % No. of outputs
 nyN=1;      % No. of outputs at the terminal point
@@ -44,6 +44,7 @@ prY2=states(2);
 prY3=states(3); 
 pressY=states(4);
 x_hp = states(5);
+x_lp = states (6);
 
 dpressY=controls(1);
 
@@ -60,7 +61,14 @@ x_dot=[prY2;...
        tmp4; ...
        prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
        dpressY;... %per non avere il controllo in uscita
-       (-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+ pressY];
+       (-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+[(1/tau_lp)*x_lp];...
+       (-1/tau_lp)*x_lp+pressY];
+
+% x_dot=[prY2;...
+%        tmp4; ...
+%        prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
+%        (-1/tau_lp)*x_lp+dpressY;... %per non avere il controllo in uscita
+%        (-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+[(1/tau_lp)*x_lp]];...
    
 %%
 
@@ -75,7 +83,7 @@ impl_f = xdot - x_dot;
 
 % objectives
 
-h = [(-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+ pressY; pressY];
+h = [(-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+ [(1/tau_lp)*x_lp]; pressY];
 
 hN=[pressY]; %generic state 
 

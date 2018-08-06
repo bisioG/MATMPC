@@ -14,4 +14,8 @@ g = 9.81;
 
 tau_hp = 21; %[sec]
 
+% LOW PASS FILTER
+
+tau_lp = 0.1; %[sec]
+
 

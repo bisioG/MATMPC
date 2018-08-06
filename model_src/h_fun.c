@@ -181,26 +181,25 @@ mxArray* casadi_to_mex(const int* sp, const casadi_real* x) {
 /* h_fun:(states[5],controls,params[3])->(h[2]) */
 static int casadi_f0(const casadi_real** arg, casadi_real** res, int* iw, casadi_real* w, void* mem) {
   casadi_real a0=-4.7619047619047616e-002;
-  casadi_real a1=arg[0] ? arg[0][4] : 0;
+  casadi_real a1=arg[0] ? arg[0][3] : 0;
   a0=(a0*a1);
-  a1=20000.;
-  casadi_real a2=arg[0] ? arg[0][0] : 0;
-  casadi_real a3=sq(a2);
-  a1=(a1*a3);
-  a3=arg[0] ? arg[0][1] : 0;
-  a1=(a1*a3);
-  a3=1200000.;
-  casadi_real a4=sq(a2);
-  a3=(a3*a4);
-  a3=(a3*a2);
-  a1=(a1+a3);
+  a1=125000.;
+  casadi_real a2=arg[0] ? arg[0][1] : 0;
+  a1=(a1*a2);
+  a2=4500.;
+  casadi_real a3=arg[0] ? arg[0][0] : 0;
+  a2=(a2*a3);
   a3=1.6000000000000000e-002;
-  a1=(a1/a3);
+  a2=(a2/a3);
+  a1=(a1+a2);
   a0=(a0+a1);
-  a1=arg[0] ? arg[0][3] : 0;
+  a1=10.;
+  a2=arg[0] ? arg[0][4] : 0;
+  a1=(a1*a2);
   a0=(a0+a1);
   if (res[0]!=0) res[0][0]=a0;
-  if (res[0]!=0) res[0][1]=a1;
+  a0=arg[0] ? arg[0][2] : 0;
+  if (res[0]!=0) res[0][1]=a0;
   return 0;
 }
 
@@ -254,7 +253,7 @@ CASADI_SYMBOL_EXPORT int h_fun_work(int *sz_arg, int* sz_res, int *sz_iw, int *s
   if (sz_arg) *sz_arg = 3;
   if (sz_res) *sz_res = 1;
   if (sz_iw) *sz_iw = 0;
-  if (sz_w) *sz_w = 5;
+  if (sz_w) *sz_w = 4;
   return 0;
 }
 

@@ -184,55 +184,42 @@ mxArray* casadi_to_mex(const int* sp, const casadi_real* x) {
 
 /* Ji_fun:(i0[5],i1,i2[3],i3[2],i4[2x2])->(o0[2x5],o1[2]) */
 static int casadi_f0(const casadi_real** arg, casadi_real** res, int* iw, casadi_real* w, void* mem) {
-  casadi_real a0=arg[4] ? arg[4][0] : 0;
-  a0=sqrt(a0);
+  casadi_real a0=4500.;
   casadi_real a1=6.2500000000000000e+001;
-  casadi_real a2=arg[0] ? arg[0][1] : 0;
-  casadi_real a3=20000.;
-  casadi_real a4=arg[0] ? arg[0][0] : 0;
-  casadi_real a5=(a4+a4);
-  a5=(a3*a5);
-  a2=(a2*a5);
-  a5=1200000.;
-  casadi_real a6=(a4+a4);
-  a6=(a5*a6);
-  a6=(a4*a6);
-  casadi_real a7=sq(a4);
-  a5=(a5*a7);
-  a6=(a6+a5);
-  a2=(a2+a6);
-  a2=(a1*a2);
-  a6=(a0*a2);
-  if (res[0]!=0) res[0][0]=a6;
-  a6=arg[4] ? arg[4][1] : 0;
-  a6=sqrt(a6);
-  a2=(a6*a2);
-  if (res[0]!=0) res[0][1]=a2;
-  a4=sq(a4);
-  a3=(a3*a4);
+  casadi_real a2=arg[4] ? arg[4][0] : 0;
+  a2=sqrt(a2);
+  casadi_real a3=(a1*a2);
+  a3=(a0*a3);
+  if (res[0]!=0) res[0][0]=a3;
+  a3=arg[4] ? arg[4][1] : 0;
+  a3=sqrt(a3);
   a1=(a1*a3);
-  a3=(a0*a1);
-  if (res[0]!=0) res[0][2]=a3;
-  a1=(a6*a1);
-  if (res[0]!=0) res[0][3]=a1;
-  a1=0.;
-  if (res[0]!=0) res[0][4]=a1;
-  if (res[0]!=0) res[0][5]=a1;
-  a3=arg[4] ? arg[4][2] : 0;
-  a3=sqrt(a3);
-  a3=(a0+a3);
-  if (res[0]!=0) res[0][6]=a3;
-  a3=arg[4] ? arg[4][3] : 0;
-  a3=sqrt(a3);
-  a3=(a6+a3);
-  if (res[0]!=0) res[0][7]=a3;
-  a3=-4.7619047619047616e-002;
-  a0=(a3*a0);
-  if (res[0]!=0) res[0][8]=a0;
-  a3=(a3*a6);
-  if (res[0]!=0) res[0][9]=a3;
-  if (res[1]!=0) res[1][0]=a1;
-  if (res[1]!=0) res[1][1]=a1;
+  a0=(a0*a1);
+  if (res[0]!=0) res[0][1]=a0;
+  a0=125000.;
+  a1=(a0*a2);
+  if (res[0]!=0) res[0][2]=a1;
+  a0=(a0*a3);
+  if (res[0]!=0) res[0][3]=a0;
+  a0=arg[4] ? arg[4][2] : 0;
+  a0=sqrt(a0);
+  if (res[0]!=0) res[0][4]=a0;
+  a0=arg[4] ? arg[4][3] : 0;
+  a0=sqrt(a0);
+  if (res[0]!=0) res[0][5]=a0;
+  a0=-4.7619047619047616e-002;
+  a1=(a0*a2);
+  if (res[0]!=0) res[0][6]=a1;
+  a0=(a0*a3);
+  if (res[0]!=0) res[0][7]=a0;
+  a0=10.;
+  a2=(a0*a2);
+  if (res[0]!=0) res[0][8]=a2;
+  a0=(a0*a3);
+  if (res[0]!=0) res[0][9]=a0;
+  a0=0.;
+  if (res[1]!=0) res[1][0]=a0;
+  if (res[1]!=0) res[1][1]=a0;
   return 0;
 }
 
@@ -292,7 +279,7 @@ CASADI_SYMBOL_EXPORT int Ji_fun_work(int *sz_arg, int* sz_res, int *sz_iw, int *
   if (sz_arg) *sz_arg = 5;
   if (sz_res) *sz_res = 2;
   if (sz_iw) *sz_iw = 0;
-  if (sz_w) *sz_w = 8;
+  if (sz_w) *sz_w = 4;
   return 0;
 }
 
@@ -302,7 +289,7 @@ void mex_Ji_fun(int resc, mxArray *resv[], int argc, const mxArray *argv[]) {
   if (argc>5) mexErrMsgIdAndTxt("Casadi:RuntimeError","Evaluation of \"Ji_fun\" failed. Too many input arguments (%d, max 5)", argc);
   if (resc>2) mexErrMsgIdAndTxt("Casadi:RuntimeError","Evaluation of \"Ji_fun\" failed. Too many output arguments (%d, max 2)", resc);
   int *iw = 0;
-  casadi_real w[35];
+  casadi_real w[32];
   const casadi_real* arg[5] = {0};
   if (--argc>=0) arg[0] = casadi_from_mex(argv[0], w, casadi_s0, w+27);
   if (--argc>=0) arg[1] = casadi_from_mex(argv[1], w+5, casadi_s1, w+27);
