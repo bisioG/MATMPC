@@ -16,19 +16,69 @@ function [input, data] = InitData(settings)
     nbu = settings.nbu;
     nbu_idx = settings.nbu_idx;
     
- %% **********************MODIFICA VELOCE PESI****************************
+ %% **********************MODIFICA VELOCE PESI (PARTE COMUNE MODELLI) ****************************
+ 
     if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||...
             strcmp(settings.model,'ActiveSeat_onlyP_HP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
             strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')||...
-            strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')
-        Wq_t(1) = 10;
-        Wr3_t(1)= 0.5;
-    end
-%% ************************IMPOSTAZIONE PESI E LIMITI *************************
+            strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')||strcmp(settings.model,'ActiveSeat_onlyP_HP_LP_v2')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP_LP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP_LP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_HP_LP_contact')||strcmp(settings.model,'ActiveSeat_onlyP_contact')
+        
+        
+        Wq_t(1) = 100;
+        Wr3_t(1)= 0.1;
+        
+        %% parte comune a tutti i modelli
+        input.u0 = zeros(nu,1);
+        para0 = [0 0 0];
 
-    
-    switch settings.model
-        case 'ActiveSeat'
+
+        Wq = diag(Wq_t); % diag matrix coi pesi
+        Wr3 = diag(Wr3_t); % diag matrix coi pesi
+            
+        Q = blkdiag(Wq,Wr3);
+        QN = Wq(1:nyN,1:nyN)*0;
+            
+            
+         % upper and lower bounds for states (=nbx)
+            
+         lb_x = [];%-inf(nu,1);
+         ub_x = [];%-lb_x;
+
+         % upper and lower bounds for controls (=nbu)           
+         lb_u = [];
+         ub_u = [];
+                       
+         % upper and lower bounds for general constraints (=nc)
+         lb_g = [];
+         ub_g = [];            
+         lb_gN = [];
+         ub_gN = [];
+
+         % store the constraint data into input
+            
+            input.lb=repmat([lb_g;lb_x],1,N);
+            input.ub=repmat([ub_g;ub_x],1,N); 
+            input.lbN=[lb_gN;lb_x];               
+            input.ubN=[ub_gN;ub_x]; 
+            
+            lbu = -inf(nu,1);
+            ubu = inf(nu,1);
+            for i=1:nbu
+                lbu(nbu_idx(i)) = lb_u(i);
+                ubu(nbu_idx(i)) = ub_u(i);
+            end
+            
+            input.lbu = repmat(lbu,1,N);
+            input.ubu = repmat(ubu,1,N);
+        
+        
+    end
+%% ************************IMPOSTAZIONE PESI E LIMITI CON VESTIBOLARE *************************
+
+    if strcmp(settings.model,'ActiveSeat')
+        %case 'ActiveSeat'
             
             input.x0 = [zeros(1,nx-4), 0.0001, 0, 0, 0]';
             input.u0 = zeros(nu,1);
@@ -103,516 +153,111 @@ function [input, data] = InitData(settings)
             lb_gN = [];
             ub_gN = [];
             
-        case 'ActiveSeat_onlyP'
+%****************** CONDIZIONI INIZIALI IN BASE AL MODELLO ***************************************************************
+
+    elseif strcmp(settings.model,'ActiveSeat_onlyP')   
+        %case 'ActiveSeat_onlyP'
             
             flag_hp = 0; %flag for the right pressure reference 0 no filter
             
             input.x0 = [0, 0.0001, 0, 0]';
-            input.u0 = zeros(nu,1);
-            para0 = [0 0 0];
-
-%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
-
-            Wq = diag(Wq_t); % diag matrix coi pesi
-
-%             Wr3_t(1)= 0.1;
-            Wr3 = diag(Wr3_t); % diag matrix coi pesi
+    elseif strcmp(settings.model,'ActiveSeat_onlyP_contact')   
+        %case 'ActiveSeat_onlyP'
             
-            Q = blkdiag(Wq,Wr3);
-            QN = Wq(1:nyN,1:nyN)*0;
+            flag_hp = 0; %flag for the right pressure reference 0 no filter
             
+            input.x0 = [0, 0.0001, 0, 0]';
             
-            % upper and lower bounds for states (=nbx)
-            
-            lb_x = [];%-inf(nu,1);
-            ub_x = [];%-lb_x;
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-            % store the constraint data into input
-            
-            input.lb=repmat([lb_g;lb_x],1,N);
-            input.ub=repmat([ub_g;ub_x],1,N); 
-            nput.lbN=[lb_gN;lb_x];               
-            input.ubN=[ub_gN;ub_x]; 
-            
-            lbu = -inf(nu,1);
-            ubu = inf(nu,1);
-            for i=1:nbu
-                lbu(nbu_idx(i)) = lb_u(i);
-                ubu(nbu_idx(i)) = ub_u(i);
-            end
-            
-            input.lbu = repmat(lbu,1,N);
-            input.ubu = repmat(ubu,1,N);
-            
-        case 'ActiveSeat_onlyP_HP'
+    elseif strcmp(settings.model,'ActiveSeat_onlyP_HP')        
+        %case 'ActiveSeat_onlyP_HP'
             
             flag_hp = 1; %flag for the right pressure reference 1 with filter
             
             input.x0 = [0, 0.0001, 0, 0, 0]'; %AGGIUNTA uno STATo
-            input.u0 = zeros(nu,1);
-            para0 = [0 0 0];
-    
-%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
-
-            Wq = diag(Wq_t); % diag matrix coi pesi
-
-%             Wr3_t(1)= 0.1;
-            Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
-            Q = blkdiag(Wq,Wr3);
-            QN = Wq(1:nyN,1:nyN)*0;
-            
-            
-            % upper and lower bounds for states (=nbx)
-            
-            lb_x = [];%-inf(nu,1);
-            ub_x = [];%-lb_x;
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-            % store the constraint data into input
-            
-            input.lb=repmat([lb_g;lb_x],1,N);
-            input.ub=repmat([ub_g;ub_x],1,N); 
-            nput.lbN=[lb_gN;lb_x];               
-            input.ubN=[ub_gN;ub_x]; 
-            
-            lbu = -inf(nu,1);
-            ubu = inf(nu,1);
-            for i=1:nbu
-                lbu(nbu_idx(i)) = lb_u(i);
-                ubu(nbu_idx(i)) = ub_u(i);
-            end
-            
-            input.lbu = repmat(lbu,1,N);
-            input.ubu = repmat(ubu,1,N);
-            
-      case 'ActiveSeat_onlyP_HP_LP'
+    elseif strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')        
+      %case 'ActiveSeat_onlyP_HP_LP'
             
             flag_hp = 1; %flag for the right pressure reference 1 with filter
             
             input.x0 = [0, 0.0001, 0, 0, 0, 0]'; %AGGIUNTA uno STATo
-            input.u0 = zeros(nu,1);
-            para0 = [0 0 0];
-    
-%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
-
-            Wq = diag(Wq_t); % diag matrix coi pesi
-
-%             Wr3_t(1)= 0.1;
-            Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
-            Q = blkdiag(Wq,Wr3);
-            QN = Wq(1:nyN,1:nyN)*0;
+    elseif strcmp(settings.model,'ActiveSeat_onlyP_HP_LP_v2')        
+      %case 'ActiveSeat_onlyP_HP_LP_v2'
             
+            flag_hp = 1; %flag for the right pressure reference 1 with filter
             
-            % upper and lower bounds for states (=nbx)
+            input.x0 = [0, 0.0001, 0, 0, 0, 0, 0]'; 
             
-            lb_x = [];%-inf(nu,1);
-            ub_x = [];%-lb_x;
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-            % store the constraint data into input
+     elseif strcmp(settings.model,'ActiveSeat_onlyP_HP_LP_contact')        
+      %case 'ActiveSeat_onlyP_HP_LP_contact'
             
-            input.lb=repmat([lb_g;lb_x],1,N);
-            input.ub=repmat([ub_g;ub_x],1,N); 
-            nput.lbN=[lb_gN;lb_x];               
-            input.ubN=[ub_gN;ub_x]; 
+            flag_hp = 1; %flag for the right pressure reference 1 with filter
             
-            lbu = -inf(nu,1);
-            ubu = inf(nu,1);
-            for i=1:nbu
-                lbu(nbu_idx(i)) = lb_u(i);
-                ubu(nbu_idx(i)) = ub_u(i);
-            end
+            input.x0 = [0, 0.0001, 0, 0, 0, 0]'; 
             
-            input.lbu = repmat(lbu,1,N);
-            input.ubu = repmat(ubu,1,N);
-            
-      case 'ActiveSeat_onlyP_Lin'
+     elseif strcmp(settings.model,'ActiveSeat_onlyP_Lin')       
+      %case 'ActiveSeat_onlyP_Lin'
             
             flag_hp = 0; %flag for the right pressure reference 0 no filter
           
             input.x0 = [0, 0.0001, 0]';
-            input.u0 = zeros(nu,1);
-            para0 = [0 0 0];         
-
-%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
-
-            Wq = diag(Wq_t); % diag matrix coi pesi
-
-%             Wr3_t(1)= 0.1;
-            Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
-            Q = blkdiag(Wq,Wr3);
-            QN = Wq(1:nyN,1:nyN)*0;
-            
-            
-            % upper and lower bounds for states (=nbx)
-            
-            lb_x = [];%-inf(nu,1);
-            ub_x = [];%-lb_x;
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-            % store the constraint data into input
-            
-            input.lb=repmat([lb_g;lb_x],1,N);
-            input.ub=repmat([ub_g;ub_x],1,N); 
-            nput.lbN=[lb_gN;lb_x];               
-            input.ubN=[ub_gN;ub_x]; 
-            
-            lbu = -inf(nu,1);
-            ubu = inf(nu,1);
-            for i=1:nbu
-                lbu(nbu_idx(i)) = lb_u(i);
-                ubu(nbu_idx(i)) = ub_u(i);
-            end
-            
-            input.lbu = repmat(lbu,1,N);
-            input.ubu = repmat(ubu,1,N);
-            
-     case 'ActiveSeat_onlyP_Lin_Long'
+     elseif strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')      
+     %case 'ActiveSeat_onlyP_Lin_Long'
             
             flag_hp = 0; %flag for the right pressure reference 0 no filter
          
             input.x0 = [0, 0.0001, 0]';
-            input.u0 = zeros(nu,1);
-            para0 = [0 0 0];         
-
-%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
-
-            Wq = diag(Wq_t); % diag matrix coi pesi
-
-%             Wr3_t(1)= 0.1;
-            Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
-            Q = blkdiag(Wq,Wr3);
-            QN = Wq(1:nyN,1:nyN)*0;
-            
-            
-            % upper and lower bounds for states (=nbx)
-            
-            lb_x = [];%-inf(nu,1);
-            ub_x = [];%-lb_x;
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-            % store the constraint data into input
-            
-            input.lb=repmat([lb_g;lb_x],1,N);
-            input.ub=repmat([ub_g;ub_x],1,N); 
-            nput.lbN=[lb_gN;lb_x];               
-            input.ubN=[ub_gN;ub_x]; 
-            
-            lbu = -inf(nu,1);
-            ubu = inf(nu,1);
-            for i=1:nbu
-                lbu(nbu_idx(i)) = lb_u(i);
-                ubu(nbu_idx(i)) = ub_u(i);
-            end
-            
-            input.lbu = repmat(lbu,1,N);
-            input.ubu = repmat(ubu,1,N);
-            
-       case 'ActiveSeat_onlyP_Lin_HP'
+     elseif strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')      
+       %case 'ActiveSeat_onlyP_Lin_HP'
            
             flag_hp = 1; %flag for the right pressure reference 1 with filter
             
             input.x0 = [0, 0.0001, 0, 0]';
-            input.u0 = zeros(nu,1);
-            para0 = [0 0 0];         
-
-%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
-
-            Wq = diag(Wq_t); % diag matrix coi pesi
-
-%             Wr3_t(1)= 0.1;
-            Wr3 = diag(Wr3_t); % diag matrix coi pesi
-            
-            Q = blkdiag(Wq,Wr3);
-            QN = Wq(1:nyN,1:nyN)*0;
-            
-            
-            % upper and lower bounds for states (=nbx)
-            
-            lb_x = [];%-inf(nu,1);
-            ub_x = [];%-lb_x;
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-            % store the constraint data into input
-            
-            input.lb=repmat([lb_g;lb_x],1,N);
-            input.ub=repmat([ub_g;ub_x],1,N); 
-            nput.lbN=[lb_gN;lb_x];               
-            input.ubN=[ub_gN;ub_x]; 
-            
-            lbu = -inf(nu,1);
-            ubu = inf(nu,1);
-            for i=1:nbu
-                lbu(nbu_idx(i)) = lb_u(i);
-                ubu(nbu_idx(i)) = ub_u(i);
-            end
-            
-            input.lbu = repmat(lbu,1,N);
-            input.ubu = repmat(ubu,1,N);
-            
-     case 'ActiveSeat_onlyP_Lin_Long_HP'
+           
+     elseif strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')        
+      %case 'ActiveSeat_onlyP_Lin_Long_HP'
          
             flag_hp = 1; %flag for the right pressure reference 1 with filter
             
             input.x0 = [0, 0.0001, 0, 0]';
-            input.u0 = zeros(nu,1);
-            para0 = [0 0 0];         
-
-%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
-
-            Wq = diag(Wq_t); % diag matrix coi pesi
-
-%             Wr3_t(1)= 0.1;
-            Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
-            Q = blkdiag(Wq,Wr3);
-            QN = Wq(1:nyN,1:nyN)*0;
-            
-            
-            % upper and lower bounds for states (=nbx)
-            
-            lb_x = [];%-inf(nu,1);
-            ub_x = [];%-lb_x;
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-            % store the constraint data into input
-            
-            input.lb=repmat([lb_g;lb_x],1,N);
-            input.ub=repmat([ub_g;ub_x],1,N); 
-            nput.lbN=[lb_gN;lb_x];               
-            input.ubN=[ub_gN;ub_x]; 
-            
-            lbu = -inf(nu,1);
-            ubu = inf(nu,1);
-            for i=1:nbu
-                lbu(nbu_idx(i)) = lb_u(i);
-                ubu(nbu_idx(i)) = ub_u(i);
-            end
-            
-            input.lbu = repmat(lbu,1,N);
-            input.ubu = repmat(ubu,1,N);
-            
-      case 'ActiveSeat_onlyP_Lin_Long_HP_LP'
+     elseif strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')       
+      %case 'ActiveSeat_onlyP_Lin_Long_HP_LP'
          
             flag_hp = 1; %flag for the right pressure reference 1 with filter
             
             input.x0 = [0, 0.0001, 0, 0, 0]';
-            input.u0 = zeros(nu,1);
-            para0 = [0 0 0];         
-
-%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
-
-            Wq = diag(Wq_t); % diag matrix coi pesi
-
-%             Wr3_t(1)= 0.1;
-            Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
-            Q = blkdiag(Wq,Wr3);
-            QN = Wq(1:nyN,1:nyN)*0;
+      elseif strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP_LP')       
+      %case 'ActiveSeat_onlyP_Lin_Long_HP_LP'
+         
+            flag_hp = 1; %flag for the right pressure reference 1 with filter
             
+            input.x0 = [0, 0.0001, 0, 0, 0]';
             
-            % upper and lower bounds for states (=nbx)
-            
-            lb_x = [];%-inf(nu,1);
-            ub_x = [];%-lb_x;
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-            % store the constraint data into input
-            
-            input.lb=repmat([lb_g;lb_x],1,N);
-            input.ub=repmat([ub_g;ub_x],1,N); 
-            nput.lbN=[lb_gN;lb_x];               
-            input.ubN=[ub_gN;ub_x]; 
-            
-            lbu = -inf(nu,1);
-            ubu = inf(nu,1);
-            for i=1:nbu
-                lbu(nbu_idx(i)) = lb_u(i);
-                ubu(nbu_idx(i)) = ub_u(i);
-            end
-            
-            input.lbu = repmat(lbu,1,N);
-            input.ubu = repmat(ubu,1,N);
-            
-      case 'ActiveSeat_onlyP_WOfriction'
+      elseif strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')        
+      %case 'ActiveSeat_onlyP_WOfriction'
           
             flag_hp = 0; %flag for the right pressure reference 0 no filter
             
             input.x0 = [0, 0.0001, 0]';
-            input.u0 = zeros(nu,1);
-            para0 = [0 0 0];         
-
-%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
-
-            Wq = diag(Wq_t); % diag matrix coi pesi
-
-%             Wr3_t(1)= 0.1;
-            Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
-            Q = blkdiag(Wq,Wr3);
-            QN = Wq(1:nyN,1:nyN)*0;
-            
-            
-            % upper and lower bounds for states (=nbx)
-            
-            lb_x = [];%-inf(nu,1);
-            ub_x = [];%-lb_x;
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-            % store the constraint data into input
-            
-            input.lb=repmat([lb_g;lb_x],1,N);
-            input.ub=repmat([ub_g;ub_x],1,N); 
-            nput.lbN=[lb_gN;lb_x];               
-            input.ubN=[ub_gN;ub_x]; 
-            
-            lbu = -inf(nu,1);
-            ubu = inf(nu,1);
-            for i=1:nbu
-                lbu(nbu_idx(i)) = lb_u(i);
-                ubu(nbu_idx(i)) = ub_u(i);
-            end
-            
-            input.lbu = repmat(lbu,1,N);
-            input.ubu = repmat(ubu,1,N);
-            
-       case 'ActiveSeat_onlyP_WOfriction_HP'
+     elseif strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')      
+       %case 'ActiveSeat_onlyP_WOfriction_HP'
            
             flag_hp = 1; %flag for the right pressure reference 1 with filter
             
             input.x0 = [0, 0.0001, 0, 0]';
-            input.u0 = zeros(nu,1);
-            para0 = [0 0 0];         
-
-%             Wq_t(1) = 10; % peso sull'unica uscita pressione totale ypress
-
-            Wq = diag(Wq_t); % diag matrix coi pesi
-
-%             Wr3_t(1)= 0.1;
-            Wr3 = diag(Wr3_t); % diag matrix coi pesi
             
-            Q = blkdiag(Wq,Wr3);
-            QN = Wq(1:nyN,1:nyN)*0;
+      elseif strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP_LP')      
+       %case 'ActiveSeat_onlyP_WOfriction_HP'
+           
+            flag_hp = 1; %flag for the right pressure reference 1 with filter
             
-            
-            % upper and lower bounds for states (=nbx)
-            
-            lb_x = [];%-inf(nu,1);
-            ub_x = [];%-lb_x;
-
-            % upper and lower bounds for controls (=nbu)           
-            lb_u = [];
-            ub_u = [];
-                       
-            % upper and lower bounds for general constraints (=nc)
-            lb_g = [];
-            ub_g = [];            
-            lb_gN = [];
-            ub_gN = [];
-
-            % store the constraint data into input
-            
-            input.lb=repmat([lb_g;lb_x],1,N);
-            input.ub=repmat([ub_g;ub_x],1,N); 
-            nput.lbN=[lb_gN;lb_x];               
-            input.ubN=[ub_gN;ub_x]; 
-            
-            lbu = -inf(nu,1);
-            ubu = inf(nu,1);
-            for i=1:nbu
-                lbu(nbu_idx(i)) = lb_u(i);
-                ubu(nbu_idx(i)) = ub_u(i);
-            end
-            
-            input.lbu = repmat(lbu,1,N);
-            input.ubu = repmat(ubu,1,N);
-            
+            input.x0 = [0, 0.0001, 0, 0, 0]';
            
     end
 
@@ -660,6 +305,12 @@ function [input, data] = InitData(settings)
             data.PAR = AS_PAR();
             cd(main_folder);
          
+        case 'ActiveSeat_onlyP_contact'
+            cd([main_folder,'\data\ActiveSeat_onlyP']);
+            data.REF = AS_REF_onlyP(flag_hp);
+            data.PAR = AS_PAR();
+            cd(main_folder);
+         
         case 'ActiveSeat_onlyP_HP'
             cd([main_folder,'\data\ActiveSeat_onlyP']);
             data.REF = AS_REF_onlyP(flag_hp);
@@ -667,6 +318,18 @@ function [input, data] = InitData(settings)
             cd(main_folder);
             
         case 'ActiveSeat_onlyP_HP_LP'
+            cd([main_folder,'\data\ActiveSeat_onlyP']);
+            data.REF = AS_REF_onlyP(flag_hp);
+            data.PAR = AS_PAR();
+            cd(main_folder);
+            
+        case 'ActiveSeat_onlyP_HP_LP_v2'
+            cd([main_folder,'\data\ActiveSeat_onlyP']);
+            data.REF = AS_REF_onlyP(flag_hp);
+            data.PAR = AS_PAR();
+            cd(main_folder);
+            
+        case 'ActiveSeat_onlyP_HP_LP_contact'
             cd([main_folder,'\data\ActiveSeat_onlyP']);
             data.REF = AS_REF_onlyP(flag_hp);
             data.PAR = AS_PAR();
@@ -702,6 +365,12 @@ function [input, data] = InitData(settings)
             data.PAR = AS_PAR_LONG();
             cd(main_folder);
             
+        case 'ActiveSeat_onlyP_Lin_HP_LP'
+            cd([main_folder,'\data\ActiveSeat_onlyP']);
+            data.REF = AS_REF_onlyP(flag_hp);
+            data.PAR = AS_PAR();
+            cd(main_folder);
+            
         case 'ActiveSeat_onlyP_WOfriction'
             cd([main_folder,'\data\ActiveSeat_onlyP']);
             data.REF = AS_REF_onlyP(flag_hp);
@@ -709,6 +378,12 @@ function [input, data] = InitData(settings)
             cd(main_folder);
             
         case 'ActiveSeat_onlyP_WOfriction_HP'
+            cd([main_folder,'\data\ActiveSeat_onlyP']);
+            data.REF = AS_REF_onlyP(flag_hp);
+            data.PAR = AS_PAR();
+            cd(main_folder);
+            
+        case 'ActiveSeat_onlyP_WOfriction_HP_LP'
             cd([main_folder,'\data\ActiveSeat_onlyP']);
             data.REF = AS_REF_onlyP(flag_hp);
             data.PAR = AS_PAR();

@@ -7,7 +7,7 @@ disp('---------------------------------------------');
 addpath([pwd,'/examples']);
 
 
-settings.model='ActiveSeat_onlyP_Lin_Long_HP_LP'; % see the folder "examples" for details 
+settings.model='ActiveSeat_onlyP_HP_LP'; % see the folder "examples" for details 
 
 % Models not filtered:
 % ActiveSeat
@@ -20,9 +20,12 @@ settings.model='ActiveSeat_onlyP_Lin_Long_HP_LP'; % see the folder "examples" fo
 % ActiveSeat_onlyP_HP
 % ActiveSeat_onlyP_HP_LP
 % ActiveSeat_onlyP_Lin_HP
+% ActiveSeat_onlyP_Lin_HP_LP
 % ActiveSeat_onlyP_WOfriction_HP
+% ActiveSeat_onlyP_WOfriction_HP_LP
 % ActiveSeat_onlyP_Lin_Long_HP
 % ActiveSeat_onlyP_Lin_Long_HP_LP
+% ActiveSeat_onlyP_HP_LP_contact (contact function)
 
 run(settings.model);
 

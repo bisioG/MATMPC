@@ -51,6 +51,7 @@ x_dot=[prY2;...
        -(c1*(prY1)^2+c2)/m*prY2-(k1*(prY1)^2+k2)*prY1/m+accY+MM*g*roll/m; ...            
        dpressY;...
        (-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+ pressY];
+       
    
  
 xdot = SX.sym('xdot',nx,1);
@@ -59,7 +60,7 @@ impl_f = xdot - x_dot;
 %% Objectives and constraints
 
 % objectives
-h = [(-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+ pressY; pressY ];
+h = [(-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+ pressY]; pressY ];
 
 hN=[pressY]; %generic state 
 

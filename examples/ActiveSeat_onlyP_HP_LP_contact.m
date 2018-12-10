@@ -1,4 +1,6 @@
-% ONLY LATERAL PRESSURE MODEL NON LINEAR + HIGH PASS FILTER (percived pressure)+LOW PASS FILTER (valves dynamics) ( 6 STATI)
+% ONLY LATERAL PRESSURE MODEL NON LINEAR + HIGH PASS FILTER (percived pressure)+LOW PASS FILTER (valves dynamics)
+% CONTACT RELATIONS
+%( 6 STATI)
 % ricordarsi di modificare anche InitData inizializzando opportunamente il
 % vettore
 
@@ -43,13 +45,13 @@ prY1=states(1);
 prY2=states(2); 
 prY3=states(3); 
 pressY=states(4);
-x_hp = states(5);
-x_lp = states (6);
+x_hp=states(5);
+x_lp=states(6);
 
 dpressY=controls(1);
 
    
-%% versione 5 stati [no y_press_hp no y_press], espressione uscita su funzione di costo
+%% versione 6 stati 
 
 tmp1= (sqrt(prY2^2)*prY3) ; %modulo( prY2 )* prY3
 tmp2= m*accX*cos(pi/180*alpha)+MM*g*sin(pi/180*alpha) ; %Fn = normale al poggia schiena
@@ -57,31 +59,21 @@ tmp3= 1/(pi)*atan(tmp2)+0.6 ;   %fuzione per annullare o meno attrito in presenz
 
 tmp4 = -(c1*(prY1)^2+c2)/m*prY2-(k1*(prY1)^2+k2)*prY1/m+accY+MM*g*roll/m-sigma_0*prY3/m; %body dynamic eq
 
-% x_dot=[prY2;...
-%        tmp4; ...
-%        prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
-%        dpressY;... %per non avere il controllo in uscita
-%        (-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+[(1/tau_lp)*G_lp_mpc*x_lp];...
-%        (-1/tau_lp)*x_lp+pressY];
-%    
- x_dot=[prY2;...
-       tmp4; ...
-       prY2-tmp1/((Fc*tmp3*tmp2+((Fs-Fc)*tmp3*tmp2*exp(-(prY2/vs)^2)))/sigma_0);...               
-       dpressY;... %per non avere il controllo in uscita
-       (-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+[(1/tau_lp)*G_lp_mpc*x_lp];...
-       (-1/tau_lp)*x_lp+pressY];
 
-% x_dot=[prY2;...
-%        tmp4; ...
-%        prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
-%        (-1/tau_lp)*x_lp+dpressY;... %per non avere il controllo in uscita
-%        (-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+[(1/tau_lp)*x_lp]];...
+% temp5 = prY1+(dpressY/c_ang);                      %d=profondita` espressa come la derivata del raggio di curvatura
+% temp6 = (pressY+q_lin)/c_ang;               %R= raggio di curvatura in funzione della pressione
+% temp7 = (2/pi)*E*(temp5/temp6)^(1/2);       %Ps= pressione subita dal corpo nel contatto (formula di Hertz)
+
+
+x_dot=[prY2;...
+       tmp4; ...
+       prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
+       dpressY;... 
+       (-1/tau_hp)*x_hp+((c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1)/A+((1/tau_lp)*G_lp_mpc*x_lp);...
+       (-1/tau_lp)*x_lp+(2/pi)*E*((prY1+(((pressY+q_lin)/c_ang)-r0))/((pressY+q_lin)/c_ang))^(1/2)];
+
    
 %%
-
-xdot = SX.sym('xdot',nx,1);
-impl_f = xdot - x_dot;
-   
  
 xdot = SX.sym('xdot',nx,1);
 impl_f = xdot - x_dot;
@@ -90,7 +82,7 @@ impl_f = xdot - x_dot;
 
 % objectives
 
-h = [(-1/tau_hp)*G_hp_mpc*x_hp+G_hp_mpc*([(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+[(1/tau_lp)*G_lp_mpc*x_lp]); pressY];
+h = [(-1/tau_hp)*G_hp_mpc*x_hp+G_hp_mpc*(((c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1)/A+((1/tau_lp)*G_lp_mpc*x_lp)); pressY];
 
 hN=[pressY]; %generic state 
 

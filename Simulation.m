@@ -36,7 +36,7 @@ opt.qpsolver='qpoases'; %'qpoases', 'quadprog', 'hpipm_sparse', 'hpipm_dense'
 opt.condensing='full';  %'full'
 opt.hotstart='no'; %'yes','no' (only for qpoases)
 opt.shifting='no'; % 'yes','no'
-opt.lin_obj='yes'; % 'yes','no' % if objective function is linear least square
+opt.lin_obj='no'; % 'yes','no' % if objective function is linear least square
 opt.ref_type=1; % 0-time invariant, 1-time varying(no preview), 2-time varying (preview)
 
 %% Initialize Data (all users have to do this)
@@ -64,7 +64,10 @@ while time(end) < Tf
     if strcmp(settings.model,'ActiveSeat_onlyP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||...
             strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
             strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')||...
-            strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')
+            strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP_LP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP_LP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_HP_LP_v2')||strcmp(settings.model,'ActiveSeat_onlyP_HP_LP_contact')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_contact')
         
         para0 = data.PAR(mem.iter,:)';
         para = repmat(para0,1,N+1);
@@ -145,7 +148,8 @@ while time(end) < Tf
     end
        
     if strcmp(settings.model,'ActiveSeat_onlyP')|| strcmp(settings.model,'ActiveSeat_onlyP_HP')||... % xf(4) = pressY
-        strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')
+        strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')||strcmp(settings.model,'ActiveSeat_onlyP_HP_LP_v2')||...
+        strcmp(settings.model,'ActiveSeat_onlyP_HP_LP_contact')||strcmp(settings.model,'ActiveSeat_onlyP_contact')
     
         input_u = [input_u; xf(4)];
     end
@@ -153,8 +157,10 @@ while time(end) < Tf
     if strcmp(settings.model,'ActiveSeat_onlyP_Lin')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')||...
             strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
             strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')||...
-            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')% xf(3) = pressY
-        input_u = [input_u; xf(3)];
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')||strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP_LP')||...
+            strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP_LP')
+        
+        input_u = [input_u; xf(3)];% xf(3) = pressY
     end
       
     % store the optimal solution and states
@@ -191,14 +197,19 @@ end
 
 %% numerical post elaboration 
 
- if strcmp(settings.model,'ActiveSeat_onlyP')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin')||...
-         strcmp(settings.model,'ActiveSeat_onlyP_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_HP')|| strcmp(settings.model,'ActiveSeat_onlyP_WOfriction_HP')||...
-         strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long')|| strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP')||...
-         strcmp(settings.model,'ActiveSeat_onlyP_HP_LP')||strcmp(settings.model,'ActiveSeat_onlyP_Lin_Long_HP_LP')
+ if strcmp(settings.model,'ActiveSeat')
      
-     run Num_elab
+ else 
+     run Num_elab       %calcolo pressione piattaforma
+     
+     run Num_elab_2     %calcolo grandezze di contatto
+     
+     run Num_elab_positive %calcolo separato parte positiva e negativa
+     run Num_elab_negative
+     
+     run Num_elab_3     %calcolo pressioni percepite e componenti attrito 
  end
- 
+        
 
 %% draw pictures (optional)
 
@@ -208,6 +219,17 @@ disp(['Average CPT: ', num2str(mean(CPT(2:end-1,:),1)) ]);
 disp(['Maximum CPT: ', num2str(max(CPT(2:end-1,:))) ]);
 
 Draw;
+
+% ancora da testare per bene (l'idea era di separare i plot a seconda se la
+% manovra interessava entrambi i lati del sedile o meno con un flag_)
+
+% %if flag_negative==1
+%         Draw_negative;
+% end
+% if flag_positive==1
+%         Draw_positive;
+% end
+
 save_data;
 
 

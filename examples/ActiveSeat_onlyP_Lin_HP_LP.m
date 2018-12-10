@@ -1,17 +1,16 @@
-% ONLY LATERAL PRESSURE MODEL NON LINEAR + HIGH PASS FILTER (percived pressure)+LOW PASS FILTER (valves dynamics) ( 6 STATI)
-% ricordarsi di modificare anche InitData inizializzando opportunamente il
-% vettore
+% ONLY LATERAL PRESSURE MODEL LINEAR + HIGH PASS FILTER
 
 %%***** SETTING MAIN MATMPC PATH
 
 path_main_matmpc = 'C:\Users\giulio\Desktop\UNIVERSITA\TESI\active seat\MATMPC';
 
-%% Load params
-run Pressure_model_params_nonLin
+%% usefull from here
+
+run Pressure_model_params_Lin
 
 %% Dimensions
 
-nx=6;       % No. of states
+nx=5;       % No. of states
 nu=1;       % No. of controls
 ny=2;       % No. of outputs
 nyN=1;      % No. of outputs at the terminal point
@@ -40,47 +39,20 @@ roll=params(2);
 accY=params(3);
 
 prY1=states(1); 
-prY2=states(2); 
-prY3=states(3); 
-pressY=states(4);
-x_hp = states(5);
-x_lp = states (6);
+prY2=states(2);  
+pressY=states(3);
+x_hp = states(4);
+x_lp = states (5);
 
 dpressY=controls(1);
 
-   
-%% versione 5 stati [no y_press_hp no y_press], espressione uscita su funzione di costo
 
-tmp1= (sqrt(prY2^2)*prY3) ; %modulo( prY2 )* prY3
-tmp2= m*accX*cos(pi/180*alpha)+MM*g*sin(pi/180*alpha) ; %Fn = normale al poggia schiena
-tmp3= 1/(pi)*atan(tmp2)+0.6 ;   %fuzione per annullare o meno attrito in presenza di contatto o meno con il sedile
-
-tmp4 = -(c1*(prY1)^2+c2)/m*prY2-(k1*(prY1)^2+k2)*prY1/m+accY+MM*g*roll/m-sigma_0*prY3/m; %body dynamic eq
-
-% x_dot=[prY2;...
-%        tmp4; ...
-%        prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
-%        dpressY;... %per non avere il controllo in uscita
-%        (-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+[(1/tau_lp)*G_lp_mpc*x_lp];...
-%        (-1/tau_lp)*x_lp+pressY];
-%    
- x_dot=[prY2;...
-       tmp4; ...
-       prY2-tmp1/((Fc*tmp3*tmp2+((Fs-Fc)*tmp3*tmp2*exp(-(prY2/vs)^2)))/sigma_0);...               
-       dpressY;... %per non avere il controllo in uscita
-       (-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+[(1/tau_lp)*G_lp_mpc*x_lp];...
+x_dot=[prY2;...
+       -c2/m*prY2-k2*prY1/m+accY+MM*g*roll/m; ...               
+       dpressY;...
+       (-1/tau_hp)*x_hp+[c2/A*prY2+k2*prY1/A]+[(1/tau_lp)*x_lp];...
        (-1/tau_lp)*x_lp+pressY];
-
-% x_dot=[prY2;...
-%        tmp4; ...
-%        prY2-tmp1/((Fc*tmp3+((Fs-Fc)*tmp3*exp(-(prY2/vs)^2)))/sigma_0);...               
-%        (-1/tau_lp)*x_lp+dpressY;... %per non avere il controllo in uscita
-%        (-1/tau_hp)*x_hp+[(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+[(1/tau_lp)*x_lp]];...
-   
-%%
-
-xdot = SX.sym('xdot',nx,1);
-impl_f = xdot - x_dot;
+       
    
  
 xdot = SX.sym('xdot',nx,1);
@@ -89,8 +61,7 @@ impl_f = xdot - x_dot;
 %% Objectives and constraints
 
 % objectives
-
-h = [(-1/tau_hp)*G_hp_mpc*x_hp+G_hp_mpc*([(c1*(prY1)^2)*prY2+(k1*(prY1)^2)*prY1]/A+[(1/tau_lp)*G_lp_mpc*x_lp]); pressY];
+h = [(-1/tau_hp)*x_hp+[c2/A*prY2+k2*prY1/A]+[(1/tau_lp)*x_lp]; pressY ];
 
 hN=[pressY]; %generic state 
 
